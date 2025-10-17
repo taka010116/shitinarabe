@@ -1,12 +1,19 @@
 {% extends "base.html" %}
 
+{% block title %}七並べオンライン{% endblock %}
+
 {% block body %}
+<h1>七並べオンラインへようこそ！</h1>
 
-<tbody>
-    
-    <h1>RenderDEMO</h1>
-    
-</tbody>
+<p>ゲームを始めるにはログインしてください。</p>
 
+<a href="{{ url_for('main.login') }}" class="button">ログイン</a>
 
+<div class="game-table">
+    <!-- 仮のカードレイアウト -->
+    <div class="card-slot">🂡</div>
+    <div class="card-slot">🂢</div>
+    <div class="card-slot">🂣</div>
+    <div class="card-slot">🂤</div>
+</div>
 {% endblock %}

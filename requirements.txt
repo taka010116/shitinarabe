@@ -1,0 +1,4 @@
+Flask==2.2.2
+gunicorn==22.0.0
+psycopg2-binary
+Werkzeug==2.2.2

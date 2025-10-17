@@ -1,32 +1,23 @@
-from flask import Blueprint, redirect, url_for, Flask, jsonify, render_template, flash, render_template_string, request,g, session
+from flask import Blueprint, redirect, url_for, render_template, flash, request, session
 from app.database import get_db, init_db
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
-import sqlite3 
-#from flask_socketio import emit
-#from app import socketio
-app = Flask(__name__)
-#main = Blueprint('main', __name__)
+
 main = Blueprint("main", __name__, template_folder="templates")
 
-@main.route('/')
+# ホーム
+@main.route("/")
 def index():
-    
-    return render_template('index.html')
+    user = session.get("username")
+    return render_template("index.html", user=user)
 
-
-if not os.path.exists("users.db"):
-    print("🗂 users.db が存在しないため作成します...")
-    init_db()
-else:
-    print("✅ users.db は既に存在します")
-
-
+# 登録
 @main.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
+
         conn = get_db()
         c = conn.cursor()
         try:
@@ -41,6 +32,7 @@ def register():
             conn.close()
     return render_template("register.html")
 
+# ログイン
 @main.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -52,6 +44,7 @@ def login():
         user = c.fetchone()
         conn.close()
         if user and check_password_hash(user["password"], password):
+            session.clear()
             session["user_id"] = user["id"]
             session["username"] = user["username"]
             flash("ログイン成功！")
@@ -60,7 +53,8 @@ def login():
             flash("ユーザー名またはパスワードが間違っています。")
     return render_template("login.html")
 
-@app.route("/account")
+# マイページ
+@main.route("/account", methods=["GET", "POST"])
 def account():
     if "username" not in session:
         return redirect(url_for("main.login"))
@@ -71,31 +65,27 @@ def account():
     user = c.fetchone()
     conn.close()
 
+    if request.method == "POST":
+        avatar = request.form.get("avatar", "(´・ω・`)")[:50]
+        bio = request.form.get("bio", "")[:100]  # 100文字制限
+        conn = get_db()
+        c = conn.cursor()
+        c.execute("UPDATE users SET avatar=?, bio=? WHERE username=?", (avatar, bio, session["username"]))
+        conn.commit()
+        conn.close()
+        flash("プロフィールを更新しました。")
+        return redirect(url_for("main.account"))
+
     return render_template("account.html", user=user)
 
-@main.route("/account/update", methods=["POST"])
-def account():
-    username = session.get("username")
-    if not username:
-        return redirect("/login")
-
-    avatar = request.form.get("avatar", "(´・ω・`)")
-    bio = request.form.get("bio", "")[:100]  # 100文字制限
-
-    conn = sqlite3.connect("users.db")
-    c = conn.cursor()
-    c.execute("UPDATE users SET avatar=?, bio=? WHERE username=?", (avatar, bio, username))
-    conn.commit()
-    conn.close()
-
-    return redirect("/account")
-
+# ログアウト
 @main.route("/logout")
 def logout():
     session.clear()
     flash("ログアウトしました。")
     return redirect(url_for("main.login"))
 
+# アカウント削除
 @main.route("/delete_account", methods=["POST"])
 def delete_account():
     if "user_id" not in session:
@@ -108,14 +98,3 @@ def delete_account():
     session.clear()
     flash("アカウントを削除しました。")
     return redirect(url_for("main.register"))
-
-@main.route("/archive")
-def archive():
-    return render_template("archive.html")
-
-app.register_blueprint(main)
-
-if __name__ == "__main__":
-    from app.database import init_db
-    init_db()  # ← データベース初期化
-    app.run(debug=True)

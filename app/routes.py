@@ -75,10 +75,20 @@ def login():
             session["user_id"] = user["id"]
             session["username"] = user["username"]
             flash("ログイン成功！")
-            return redirect(url_for("main.lobby"))  # ロビーへ移動
+            return redirect(url_for("main.account"))  # ロビーへ移動
         else:
             flash("ユーザー名またはパスワードが間違っています。")
     return render_template("login.html")
+
+@main.route("/account")
+def account():
+    if "user_id" not in session:
+        flash("ログインしてください")
+        return redirect(url_for("main.login"))
+
+    user_id = session["user_id"]
+    username = session["username"]
+    return render_template("account.html", user_id=user_id, username=username)
 
 # ----------------------------
 # ロビーのSocketIO機能

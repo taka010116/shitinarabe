@@ -1,24 +1,13 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <title>Register</title>
-</head>
+<html lang="ja">
+<head><meta charset="UTF-8"><title>アカウント登録</title></head>
 <body>
-    <h1>アカウント登録</h1>
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <ul>
-          {% for msg in messages %}
-            <li>{{ msg }}</li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-    {% endwith %}
-    <form method="POST">
-        <label>ユーザー名: <input type="text" name="username" required></label><br>
-        <label>パスワード: <input type="password" name="password" required></label><br>
-        <button type="submit">登録</button>
-    </form>
-    <p>ログインはこちら: <a href="{{ url_for('main.login') }}">Login</a></p>
+  <h1>アカウント登録</h1>
+  <form method="POST">
+    <label>名前: <input type="text" name="name" required></label><br>
+    <label>パスワード: <input type="password" name="password" required></label><br>
+    <button type="submit">登録</button>
+  </form>
+  <a href="/login">ログインはこちら</a>
 </body>
 </html>

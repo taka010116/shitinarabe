@@ -4,6 +4,7 @@ import os
 DB_NAME = os.path.join(os.path.dirname(__file__), "users.db")
 print("DEBUG: DB パス =", DB_NAME)
 
+
 def get_db():
     conn = sqlite3.connect(DB_NAME)
     print("conn : ", conn)
@@ -29,4 +30,6 @@ def init_db():
     """)
     conn.commit()
     conn.close()
+    init_db()
+    print("初期化します。")
     print("✅ users テーブルを作成または確認しました")

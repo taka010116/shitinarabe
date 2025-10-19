@@ -11,10 +11,10 @@ app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key")
 
 # Blueprint登録
 app.register_blueprint(main)
+# **アプリ起動時に必ず DB 初期化**
+from app.database import init_db
+init_db()
 
-with app.app_context():
-    from app.database import init_db
-    init_db()
 
 
 if __name__ == "__main__":

@@ -39,8 +39,8 @@ import os
 #    init_db()
 
 # ✅ Blueprintを登録
-from app.routes import main
-app.register_blueprint(main)
+#from app.routes import main
+#app.register_blueprint(main)
 
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=5000)

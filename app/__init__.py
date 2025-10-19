@@ -29,14 +29,14 @@ from flask import Flask
 from app.database import init_db
 import os
 
-app = Flask(__name__)
+#app = Flask(__name__)
 
 # ✅ セッション暗号鍵（重要）
-app.secret_key = os.environ.get("SECRET_KEY", "dev_secret_key")
+#app.secret_key = os.environ.get("SECRET_KEY", "dev_secret_key")
 
 # ✅ DB 初期化
-with app.app_context():
-    init_db()
+#with app.app_context():
+#    init_db()
 
 # ✅ Blueprintを登録
 from app.routes import main

@@ -1,14 +1,8 @@
+# app/database.py
 import sqlite3
-import os
-
-DB_NAME = os.path.join(os.path.dirname(__file__), "users.db")
-print("DEBUG: DB パス =", DB_NAME)
-
 
 def get_db():
-    conn = sqlite3.connect(DB_NAME)
-    print("conn : ", conn)
-
+    conn = sqlite3.connect("users.db")
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -19,17 +13,8 @@ def init_db():
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
-            password TEXT NOT NULL,
-            avatar TEXT DEFAULT '(´・ω・`)',
-            bio TEXT DEFAULT '',
-            wins INTEGER DEFAULT 0,
-            losses INTEGER DEFAULT 0,
-            draws INTEGER DEFAULT 0,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            password TEXT NOT NULL
         )
     """)
     conn.commit()
     conn.close()
-    init_db()
-    print("初期化します。")
-    print("✅ users テーブルを作成または確認しました")

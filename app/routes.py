@@ -1,23 +1,21 @@
-from flask import Blueprint, redirect, url_for, render_template, flash, request, session
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from app.database import get_db, init_db
 from werkzeug.security import generate_password_hash, check_password_hash
-import os
 
 main = Blueprint("main", __name__, template_folder="templates")
 
-# ホーム
-@main.route("/")
+# ---------------------------
+# ホームなど既存ルート
+# ---------------------------
+@main.route('/')
 def index():
-    user = session.get("username")
-    return render_template("index.html", user=user)
+    return render_template('index.html')
 
-# 登録
 @main.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
-
         conn = get_db()
         c = conn.cursor()
         try:
@@ -32,7 +30,6 @@ def register():
             conn.close()
     return render_template("register.html")
 
-# ログイン
 @main.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -44,7 +41,6 @@ def login():
         user = c.fetchone()
         conn.close()
         if user and check_password_hash(user["password"], password):
-            session.clear()
             session["user_id"] = user["id"]
             session["username"] = user["username"]
             flash("ログイン成功！")
@@ -53,39 +49,19 @@ def login():
             flash("ユーザー名またはパスワードが間違っています。")
     return render_template("login.html")
 
-# マイページ
-@main.route("/account", methods=["GET", "POST"])
+@main.route("/account")
 def account():
-    if "username" not in session:
+    if "user_id" not in session:
+        flash("ログインしてください。")
         return redirect(url_for("main.login"))
+    return render_template("account.html", username=session["username"])
 
-    conn = get_db()
-    c = conn.cursor()
-    c.execute("SELECT * FROM users WHERE username = ?", (session["username"],))
-    user = c.fetchone()
-    conn.close()
-
-    if request.method == "POST":
-        avatar = request.form.get("avatar", "(´・ω・`)")[:50]
-        bio = request.form.get("bio", "")[:100]  # 100文字制限
-        conn = get_db()
-        c = conn.cursor()
-        c.execute("UPDATE users SET avatar=?, bio=? WHERE username=?", (avatar, bio, session["username"]))
-        conn.commit()
-        conn.close()
-        flash("プロフィールを更新しました。")
-        return redirect(url_for("main.account"))
-
-    return render_template("account.html", user=user)
-
-# ログアウト
 @main.route("/logout")
 def logout():
     session.clear()
     flash("ログアウトしました。")
     return redirect(url_for("main.login"))
 
-# アカウント削除
 @main.route("/delete_account", methods=["POST"])
 def delete_account():
     if "user_id" not in session:
@@ -98,3 +74,8 @@ def delete_account():
     session.clear()
     flash("アカウントを削除しました。")
     return redirect(url_for("main.register"))
+
+if __name__ == "__main__":
+    from app.database import init_db
+    init_db()
+    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))

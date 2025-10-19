@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from app.database import get_db, init_db
 from werkzeug.security import generate_password_hash, check_password_hash
+import os 
 
 main = Blueprint("main", __name__, template_folder="templates")
 

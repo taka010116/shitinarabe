@@ -1,6 +1,7 @@
 import sqlite3
+import os
 
-DB_NAME = "users.db"
+DB_NAME = os.path.join(os.path.dirname(__file__), "users.db")  # ←絶対パスに変更
 
 def get_db():
     conn = sqlite3.connect(DB_NAME)

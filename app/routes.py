@@ -90,6 +90,23 @@ def account():
     username = session["username"]
     return render_template("account.html", user_id=user_id, username=username)
 
+@main.route("/account/update", methods=["POST"])
+def update_account():
+    if "user_id" not in session:
+        flash("ログインしてください")
+        return redirect(url_for("main.login"))
+
+    username = request.form["username"]
+    # ここで DB 更新処理
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("UPDATE users SET username=? WHERE id=?", (username, session["user_id"]))
+    conn.commit()
+    conn.close()
+
+    session["username"] = username  # セッション更新
+    flash("アカウント情報を更新しました")
+    return redirect(url_for("main.account"))
 # ----------------------------
 # ロビーのSocketIO機能
 # ----------------------------

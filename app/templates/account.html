@@ -114,10 +114,6 @@
     <form action="{{ url_for('main.delete_account') }}" method="POST">
       <button type="submit" class="delete">アカウント削除</button>
     </form>
-
-<!--
-    <p><a href="{{ url_for('main.logout') }}">ログアウト</a></p>
-  -->
     {% with messages = get_flashed_messages() %}
       {% if messages %}
         <ul>{% for msg in messages %}<li>{{ msg }}</li>{% endfor %}</ul>

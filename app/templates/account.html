@@ -110,12 +110,12 @@
       <h3>勝敗情報：</h3>
       <p>勝利：{{ wins }}　敗北：{{ losses }}　引き分け：{{ draws }}</p>
     </div>
-<!--
+
     <form action="{{ url_for('main.delete_account') }}" method="POST">
       <button type="submit" class="delete">アカウント削除</button>
     </form>
-  -->
-    <!--
+
+<!--
     <p><a href="{{ url_for('main.logout') }}">ログアウト</a></p>
   -->
     {% with messages = get_flashed_messages() %}

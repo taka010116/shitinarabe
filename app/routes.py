@@ -108,6 +108,23 @@ def update_account():
     flash("アカウント情報を更新しました")
     return redirect(url_for("main.account"))
 
+@main.route("/account/delete", methods=["POST"])
+def delete_account():
+    if "user_id" not in session:
+        flash("ログインしてください")
+        return redirect(url_for("main.login"))
+
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("DELETE FROM users WHERE id=?", (session["user_id"],))
+    conn.commit()
+    conn.close()
+
+    session.clear()
+    flash("アカウントを削除しました")
+    return redirect(url_for("main.register"))
+
+
 @main.route("/lobby")
 def lobby():
     if "user_id" not in session:

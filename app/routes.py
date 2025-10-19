@@ -25,9 +25,9 @@ def index():
 def game():
     return render_template("game.html")
 
-@main.route("/lobby")
-def lobby():
-    return render_template("lobby.html")
+#@main.route("/lobby")
+#def lobby():
+#    return render_template("lobby.html")
 
 # ----------------------------
 # データベース初期化

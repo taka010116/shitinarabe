@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>ロビー</title>
+  <style>
+    body { font-family: sans-serif; }
+    #login, #lobby { display: none; }
+    #startBtn { display: none; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>ロビー</h1>
+
+  <div id="login">
+    <input type="text" id="username" placeholder="ユーザー名を入力（任意）">
+    <input type="text" id="password" placeholder="あいことばを入力">
+    <button id="enterBtn">ロビーに入る</button>
+    <p id="loginMsg"></p>
+  </div>
+
+  <div id="lobby">
+    <h2>ロビー</h2>
+    <p>プレイヤー一覧:</p>
+    <ul id="players"></ul>
+    <button id="startBtn">開始！</button>
+    
+  </div>
+
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script>
+    const loginDiv = document.getElementById('login');
+    const lobbyDiv = document.getElementById('lobby');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const enterBtn = document.getElementById('enterBtn');
+    const loginMsg = document.getElementById('loginMsg');
+    const playersList = document.getElementById('players');
+    const startBtn = document.getElementById('startBtn');
+
+    const socket = io();
+    let currentPassword = "";
+    let currentUsername = "";
+    let isLeader = false;
+
+    loginDiv.style.display = 'block';
+
+    function generateRandomUsername() {
+      return "Player" + Math.floor(Math.random() * 1000);
+    }
+
+    enterBtn.addEventListener('click', () => {
+      currentPassword = passwordInput.value;
+      currentUsername = usernameInput.value || generateRandomUsername();
+      console.log("開始ボタンを押しました。");
+      socket.emit("join", {
+        password: currentPassword,
+        username: currentUsername
+       });
+    });
+
+    socket.on("login_result", (data) => {
+      if(data.status === "waiting"){
+        loginMsg.textContent = "接続中...";
+      }
+      if(data.status === "ready"){
+        loginDiv.style.display = 'none';
+        lobbyDiv.style.display = 'block';
+        isLeader = data.isLeader;
+        if(isLeader){
+          startBtn.style.display = 'block';
+        }
+      }
+    });
+
+    socket.on("update_players", (data) => {
+      playersList.innerHTML = '';
+      data.players.forEach(p => {
+        const li = document.createElement('li');
+        li.textContent = p;
+        playersList.appendChild(li);
+      });
+    });
+
+    startBtn.addEventListener('click', () => {
+      if(isLeader){
+        currentPassword = passwordInput.value.trim();
+        console.log("開始ボタンを押しました！")
+        console.log("password : " + currentPassword);
+        socket.emit("start_game", { password: currentPassword });
+        localStorage.setItem("gamePassword", currentPassword);
+        socket.emit("join", { password: currentPassword });
+      }
+    });
+
+    socket.on("game_start", () => {
+      const password = encodeURIComponent(currentPassword);
+      window.location.href = `/game1?password=${password}`;
+    });
+  </script>
+</body>
+</html>

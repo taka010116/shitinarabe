@@ -1,19 +1,402 @@
+<!--
+ 受信エリア -->
 {% extends "base.html" %}
 
-{% block title %}七並べオンライン{% endblock %}
+{% block title %}西暦2525年{% endblock %}
 
-{% block body %}
-<h1>七並べオンラインへようこそ！</h1>
+{% block content %}
 
-<p>ゲームを始めるにはログインしてください。</p>
+<!-- SEO -->
+<head>
+  <meta charset="utf-8">
+  <title>西暦2025年 -DOUBLE MINE-</title>
+  <meta name="description" content="西暦2025に建てられたサイト。DOUBLE MINEは心理ゲームで、攻撃側と守備側に分かれて遊べるオンラインゲームです。">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="canonical" href="https://html-mq6q.onrender.com/">
+  <meta name="keywords" content="ゲーム,オンライン,心理ゲーム,DOUBLE MINE,2525年">
+</head>
 
-<a href="{{ url_for('main.login') }}" class="button">ログイン</a>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "url": "https://html-mq6q.onrender.com/",
+  "name": "西暦2525年",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://html-mq6q.onrender.com/?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
 
-<div class="game-table">
-    <!-- 仮のカードレイアウト -->
-    <div class="card-slot">🂡</div>
-    <div class="card-slot">🂢</div>
-    <div class="card-slot">🂣</div>
-    <div class="card-slot">🂤</div>
+<style>
+    body {
+      font-family: "Arial", "Yu Gothic", sans-serif;
+      text-align: center;
+      margin-top: 100px;
+      justify-content: center; /* 横中央 */
+      align-items: center;     /* 縦中央 */
+
+    }
+    .main-text {
+      font-size: 60px;
+      font-weight: bold;
+    }
+    .year {
+      font-size: 150px;
+      font-weight: bold;
+      color: red;
+    }
+    .sub-text {
+      margin-top: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      color: green;
+      letter-spacing: 2px;
+    }
+    .jp-sub {
+      margin-top: 5px;
+      font-size: 16px;
+    }
+
+    .green-box {
+      position: absolute;
+      top: 50%;       /* 画面の縦中央 */
+      left: 50%;      /* 画面の横中央 */
+      transform: translate(-170%, -50%); /* 自身の幅・高さの半分だけずらす */
+      width: 150px;
+      padding: 20px;
+      margin: 100px;
+      font-size: 15px;
+      border: 3px solid rgb(0, 0, 0);
+    }
+
+    .green-box a {
+      display: block;
+      margin: 10px 0;
+      text-decoration: none;
+      color: black;
+
+      transition: color 0.2s;
+    }
+
+    .green-box a:hover {
+      color: darkgreen;
+      font-weight: bold;
+    }
+    
+    .container {
+      display: flex;           /* 子要素を横並びに */
+      align-items: flex-start; /* 高さの基準を上揃え */
+      gap: 20px;               /* green-box と blue-box の間隔 */
+    }
+
+    .red-box {
+      position: absolute;
+      top: 50%;       /* 画面の縦中央 */
+      left: 50%;      /* 画面の横中央 */
+      transform: translate(0%, 30%); /* 自身の幅・高さの半分だけずらす */
+      width: 150px;
+      padding: 10px;
+      margin: 100px;
+      font-size: 12px;
+      border: 3px solid rgb(0, 0, 0);
+      animation: moveAround 4s linear infinite;
+    }
+    @keyframes moveAround {
+      0%   { transform: translate(-50%, -50%) translate(0px, 0px); }
+      25%  { transform: translate(-50%, -50%) translate(100px, 0px); }
+      50%  { transform: translate(-50%, -50%) translate(100px, 100px); }
+      75%  { transform: translate(-50%, -50%) translate(0px, 100px); }
+      100% { transform: translate(-50%, -50%) translate(0px, 0px); }
+    }
+
+    .hello-box {
+      display: none;
+      position: absolute;
+      top: 50%;       /* 画面の縦中央 */
+      left: 50%;      /* 画面の横中央 */
+      transform: translate(0%, 30%); /* 自身の幅・高さの半分だけずらす */
+      width: 150px;
+      padding: 10px;
+      margin: 100px;
+      font-size: 13px;
+      border: 3px solid rgb(0, 0, 0);
+      animation: moveAround 2s linear infinite;
+    }
+    @keyframes moveAround {
+      0%   { transform: translate(-50%, -50%) translate(0px, 0px); }
+      25%  { transform: translate(-50%, -50%) translate(100px, 0px); }
+      50%  { transform: translate(-50%, -50%) translate(100px, 100px); }
+      75%  { transform: translate(-50%, -50%) translate(0px, 100px); }
+      100% { transform: translate(-50%, -50%) translate(0px, 0px); }
+    }
+
+
+    .blue-box {
+      left: 50%;
+      transform: translateX(280%);
+      top: 20px;
+      right: 20px;
+      width: 250px;
+      height: 50px;
+      padding: 10px;
+      border: 3px solid rgb(0, 0, 0);
+      box-sizing: border-box;
+      font-size: 16px;
+      color: rgb(0, 0, 0);
+    }
+
+    .p {
+      text-align:center;
+    }
+
+    .doubleMine-box {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(70%, -20%); /* 自身の幅・高さの半分だけずらす */
+      width: 300px;
+      height: 400px;
+      /* padding: 10px; */
+      /* margin: 10px; */
+      font-size: 13px;
+      border: 3px solid rgb(0, 0, 0);
+    }
+
+    .doubleMine-box a {
+      display: inline-block;     /* ブロック化して中央揃え */
+      margin-top: 15px;          /* 図形下との余白 */
+      padding: 8px 16px;
+      text-decoration: none;
+      background-color: #ffffff;
+      color: rgb(0, 255, 51);
+      font-weight: bold;
+      border-radius: 5px;
+    }
+
+    /* ボックス内にGIFを埋め込む共通クラス */
+  .gif-box {
+    position: relative;
+    width: 200px;
+    height: 200px;              /* 高さは自由に調整可能 */
+    overflow: hidden;           /* はみ出しを非表示 */
+    border-radius: 8px;         /* 角を丸く */
+    margin-bottom: 10px;        /* 下のテキストとの余白 */
+    border: 2px solid #000;     /* 枠線 */
+    transform: translate(-200%, -100%);
+  }
+
+  .gif-box2 {
+    position: relative;
+    width: 250px;
+    height: 250px;              /* 高さは自由に調整可能 */
+    overflow: hidden;           /* はみ出しを非表示 */
+    border-radius: 8px;         /* 角を丸く */
+    margin-bottom: 10px;        /* 下のテキストとの余白 */
+    border: 2px solid #000;     /* 枠線 */
+  }
+
+  .pos1 {
+    transform: translate(100%, -100%);
+  }
+
+  .pos2 {
+    transform: translate(100%, -250%);
+  }
+  .posSky {
+    transform: translate(150%, -100%);
+  }
+
+  .rotate-move {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    margin: 50px auto;
+    transform: translate(400px, -400px);
+    perspective: 800px; 
+  }
+
+  .rotate-box {
+    width: 150px;
+    height: 150px; 
+    margin: 50px auto; 
+    border: 2px solid #000; 
+    border-radius: 10px; 
+    overflow: hidden;
+    /* animation: rotateY 5s linear infinite; */ /* 5秒で1回転 */
+  }
+
+  .rotate-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    }
+
+  /* Z軸回転アニメーション */
+  @keyframes rotateY {
+    from {
+      transform: rotateY(0deg);
+    }
+    to {
+      transform: rotateY(360deg);
+    }
+  }
+  </style>
+
+<div class="main-text">
+    <span class="year">(´・ω・｀)</span>ショボーン
+  </div>
+  <div class="sub-text">
+  
+  </div>
+  <div class="jp-sub">
+    <br>
+    
+  </div>
+<p>
+
+<div class="container">
+<div class="green-box">
+  <a href="#" id="helloBtn" data-desc="*こんにちは">Hello</a>
+  <a href="/kari" data-desc="*仮">kari</a>
+  <a href="#" id="doubleBtn" data-desc="*心理ゲーム-DOUBLE MINE-">DOUBLE MINE</a>
+  <a href="/login" data-desc="*アーカイブ">Archive</a>
+  <a href="/other" data-desc="*その他">other</a>
+
 </div>
+<div class="blue-box" id="desc-box">
+  **info
+</div>
+</div>
+</p>
+
+<div class="red-box">
+  welcome to my site
+</div>
+
+<div class="hello-box" id="helloBox">
+  Hello
+</div>
+<div class="rotate-move">
+<div class="rotate-box">
+  <img src="/static/images/sky.gif" alt="GIF">
+</div>
+</div>
+
+<div class="gif-box pos1">
+  <img src="/static/images/america.gif" alt="サンプルGIF">
+</div>
+
+<div class="gif-box2 pos2">
+ <img src="/static/images/america2.gif" alt="サンプルGIF2">
+</div>
+
+
+<div class="doubleMine-box" id="doubleBox">
+  Double MINE <br>
+  *ルール*<br>
+  このゲームは攻撃側と守備側に分かれて行います。
+  まず四枚のカードが守備側に配られます。カードには1-9の数字がランダムに生成されています。
+  守備側は、二枚カードを選び、提出します。
+  続いて、攻撃側にカードが配られます。攻撃側は守備側が選んだカードを回避して選ぶ必要があります。
+  守っているカード以外のカードを選択すると、カードに書かれている数字の得点が入ります。
+  交互に行い、先に40PT取得したほうの勝利です。<br>
+  <br>
+  <a href="/game">DOUBLE MINEをPlay</a>
+</div>
+
+
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script>
+  //const socket = io();
+  const socket = io(window.location.origin);
+  const links = document.querySelectorAll(".green-box a");
+  const descBox = document.getElementById("desc-box");
+
+  links.forEach(link => {
+    link.addEventListener("mouseover", () => {
+      descBox.textContent = link.dataset.desc;
+    });
+    link.addEventListener("mouseout", () => {
+      descBox.textContent = "*info";
+    });
+  });
+
+  socket.on("connect", () => {
+    console.log("✅ 接続成功");
+  });
+
+  document.addEventListener("DOMContentLoaded", () => {
+  const helloBtn = document.getElementById("helloBtn");
+  const helloBox = document.getElementById("helloBox");
+  const doubleBtn = document.getElementById("doubleBtn");
+  const doubleBox = document.getElementById("doubleBox");
+  
+  function randInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  // 初期状態は非表示
+  helloBox.style.display = "none";
+  doubleBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    doubleBox.style.display = "flex";
+  });
+
+  helloBtn.addEventListener("click", (e) => {
+    e.preventDefault(); // ページ遷移防止
+
+    // red-box削除
+    const redBox = document.querySelector(".red-box");
+    if (redBox) redBox.remove();
+
+    // hello-boxを表示
+    helloBox.style.display = "flex";
+
+    const newBox = document.createElement("div"); // 名前を変える
+    newBox.className = "hello-box";
+    newBox.style.position = "absolute";
+    const x = Math.random() * (window.innerWidth - 160);
+    const y = Math.random() * (window.innerHeight - 60);
+    newBox.style.left = x + "px";
+    newBox.style.top = y + "px"; 
+    newBox.style.display = "flex";
+
+    // ランダム translate 30~70% で keyframes を生成
+    const tx1 = randInt(30, 70);
+    const ty1 = randInt(30, 70);
+    const tx2 = randInt(30, 70);
+    const ty2 = randInt(30, 70);
+    const tx3 = randInt(30, 70);
+    const ty3 = randInt(30, 70);
+
+    // style タグを作って keyframes を追加
+    const style = document.createElement("style");
+    style.textContent = `
+      @keyframes moveAround${Date.now()} {
+        0%   { transform: translate(-50%, -50%) translate(0%, 0%); }
+        25%  { transform: translate(-50%, -50%) translate(${tx1}%, ${ty1}%); }
+        50%  { transform: translate(-50%, -50%) translate(${tx2}%, ${ty2}%); }
+        75%  { transform: translate(-50%, -50%) translate(${tx3}%, ${ty3}%); }
+        100% { transform: translate(-50%, -50%) translate(0%, 0%); }
+      }
+    `;
+    document.head.appendChild(style);
+
+    newBox.textContent = "Hello!";
+    const duration = Math.floor(Math.random() * 9) + 1; // 1~9秒
+    newBox.style.animation = `moveAround ${duration}s linear infinite`;
+    document.body.appendChild(newBox);
+    console.log(newBox);
+
+    //document.body.appendChild(newBox);
+    console.log("Helloボタンが押されました");
+  });
+});
+
+</script>
 {% endblock %}

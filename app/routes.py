@@ -1,16 +1,40 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from flask import Blueprint, redirect, url_for, Flask, jsonify, render_template, flash, render_template_string, request,g, session
 from app.database import get_db, init_db
 from werkzeug.security import generate_password_hash, check_password_hash
-import os 
-
+import os
+import sqlite3 
+#from flask_socketio import emit
+#from app import socketio
+app = Flask(__name__)
+#main = Blueprint('main', __name__)
 main = Blueprint("main", __name__, template_folder="templates")
 
-# ---------------------------
-# ホームなど既存ルート
-# ---------------------------
 @main.route('/')
 def index():
+    
     return render_template('index.html')
+
+@main.route("/game")
+def game():
+    return render_template("game.html")
+
+@main.route("/game1")
+def game1():
+    return render_template("game1.html")
+
+@main.route("/kari")
+def kari():
+    return render_template("diary.html")
+
+
+#ここから下データベース
+
+if not os.path.exists("users.db"):
+    print("🗂 users.db が存在しないため作成します...")
+    init_db()
+else:
+    print("✅ users.db は既に存在します")
+
 
 @main.route("/register", methods=["GET", "POST"])
 def register():
@@ -50,12 +74,35 @@ def login():
             flash("ユーザー名またはパスワードが間違っています。")
     return render_template("login.html")
 
-@main.route("/account")
+@app.route("/account")
 def account():
-    if "user_id" not in session:
-        flash("ログインしてください。")
+    if "username" not in session:
         return redirect(url_for("main.login"))
-    return render_template("account.html", username=session["username"])
+
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("SELECT * FROM users WHERE username = ?", (session["username"],))
+    user = c.fetchone()
+    conn.close()
+
+    return render_template("account.html", user=user)
+
+@main.route("/account/update", methods=["POST"])
+def account():
+    username = session.get("username")
+    if not username:
+        return redirect("/login")
+
+    avatar = request.form.get("avatar", "(´・ω・`)")
+    bio = request.form.get("bio", "")[:100]  # 100文字制限
+
+    conn = sqlite3.connect("users.db")
+    c = conn.cursor()
+    c.execute("UPDATE users SET avatar=?, bio=? WHERE username=?", (avatar, bio, username))
+    conn.commit()
+    conn.close()
+
+    return redirect("/account")
 
 @main.route("/logout")
 def logout():
@@ -76,7 +123,20 @@ def delete_account():
     flash("アカウントを削除しました。")
     return redirect(url_for("main.register"))
 
+@main.route("/archive")
+def archive():
+    return render_template("archive.html")
+
+app.register_blueprint(main)
+
 if __name__ == "__main__":
     from app.database import init_db
-    init_db()
-    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    init_db()  # ← データベース初期化
+    app.run(debug=True)
+
+"""
+@socketio.on("message")
+def handle_message(data):
+    print("受信:", data)
+    emit("message", {"msg": f"サーバーが受け取った: {data}"}, broadcast=True)
+"""

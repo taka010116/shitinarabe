@@ -25,9 +25,11 @@ def create_app():
 
 app = create_app()
 
-from flask import Flask
-from app.database import init_db
-import os
+app = Flask(__name__)
+app.secret_key = os.environ.get("SECRET_KEY", "dev_secret_key")
+
+# SocketIOの初期化
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 #app = Flask(__name__)
 

@@ -5,11 +5,11 @@ from flask_socketio import SocketIO, join_room, emit
 import os, sqlite3, time, threading
 
 # Flaskアプリを先に作る
-app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "dev_secret_key")
+#app = Flask(__name__)
+#app.secret_key = os.environ.get("SECRET_KEY", "dev_secret_key")
 
 # SocketIOの初期化
-socketio = SocketIO(app, cors_allowed_origins="*")
+#socketio = SocketIO(app, cors_allowed_origins="*")
 
 # Blueprint定義
 main = Blueprint("main", __name__, template_folder="templates")

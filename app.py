@@ -8,11 +8,13 @@ import os
 app = Flask(__name__)
 # セッションでflashを使うために必要
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key")
+print("DEBUG: SECRET_KEY =", app.secret_key)
 
 # Blueprint登録
 app.register_blueprint(main)
 # **アプリ起動時に必ず DB 初期化**
 from app.database import init_db
+print("DEBUG: init_db() を実行します")
 init_db()
 
 

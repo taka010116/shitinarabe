@@ -2,9 +2,12 @@ import sqlite3
 import os
 
 DB_NAME = os.path.join(os.path.dirname(__file__), "users.db")
+print("DEBUG: DB パス =", DB_NAME)
 
 def get_db():
     conn = sqlite3.connect(DB_NAME)
+    print("conn : ", conn)
+
     conn.row_factory = sqlite3.Row
     return conn
 

@@ -4,6 +4,7 @@ eventlet.monkey_patch()
 from flask import Flask
 from app.routes import main
 import os
+from app.database import init_db, DB_NAME
 
 app = Flask(__name__)
 # セッションでflashを使うために必要
@@ -20,6 +21,6 @@ init_db()
 
 
 if __name__ == "__main__":
-    #from app.database import init_db
-    #init_db()  # データベース初期化
+    from app.database import init_db
+    init_db()  # データベース初期化
     app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))

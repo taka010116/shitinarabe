@@ -107,6 +107,14 @@ def update_account():
     session["username"] = username  # セッション更新
     flash("アカウント情報を更新しました")
     return redirect(url_for("main.account"))
+
+@main.route("/lobby")
+def lobby():
+    if "user_id" not in session:
+        flash("ログインしてください")
+        return redirect(url_for("main.login"))
+
+    return render_template("lobby.html")  # ロビー画面
 # ----------------------------
 # ロビーのSocketIO機能
 # ----------------------------

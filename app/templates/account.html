@@ -1,9 +1,23 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
-<head><meta charset="UTF-8"><title>ホーム</title></head>
+<head><meta charset="utf-8"><title>アカウント</title></head>
 <body>
-  <h1>{{ name }} さん、ようこそ！</h1>
-  <a href="/delete">アカウント削除</a><br>
-  <a href="/logout">ログアウト</a>
+  <h1>マイページ</h1>
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <ul>
+        {% for m in messages %}<li>{{ m }}</li>{% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+  <p>ログイン中: {{ user.username }}</p>
+
+  <form method="post" action="{{ url_for('delete_account') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf }}">
+    <p>アカウントを完全に削除します（取り消せません）</p>
+    <button type="submit" onclick="return confirm('本当にアカウントを削除しますか？');">アカウント削除</button>
+  </form>
+
+  <p><a href="{{ url_for('logout') }}">ログアウト</a></p>
 </body>
 </html>

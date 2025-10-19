@@ -3,3 +3,5 @@ gunicorn==22.0.0
 psycopg2-binary
 Werkzeug==2.2.2
 eventlet>=0.24.1
+mysql-connector-python
+passlib[bcrypt]

@@ -1,48 +1,72 @@
-import os
-from flask import Flask, request
-from .routes import main
-from flask_socketio import SocketIO, emit, join_room
-from config import Config
-import random, string
+from flask import Flask
+from flask_socketio import SocketIO, join_room
+from app.routes import main
 from app.database import init_db
+import os, threading, time
 
-rooms = {}
-
-socketio = SocketIO(cors_allowed_origins="*")
-
-room_players = {}
-# ロビーごとの管理: { "password": [sid1, sid2, ...] }
-waiting_rooms = {}
-
-def create_app():
-    app = Flask(__name__)
-    app.config.from_object(Config)
-    from app.routes import main
-    app.register_blueprint(main)
-
-    socketio.init_app(app)
-    return app
-
-app = create_app()
-
+# Flask アプリ作成
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev_secret_key")
 
-# SocketIOの初期化
+# DB 初期化
+with app.app_context():
+    init_db()
+
+# Blueprint 登録
+app.register_blueprint(main)
+
+# SocketIO 初期化
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-#app = Flask(__name__)
+# ----------------------------
+# マッチング用の変数
+# ----------------------------
+waiting_players = []
+rooms = []
+MAX_PLAYERS = 4
+WAIT_TIME = 30  # 秒
 
-# ✅ セッション暗号鍵（重要）
-#app.secret_key = os.environ.get("SECRET_KEY", "dev_secret_key")
+# ----------------------------
+# マッチング関数
+# ----------------------------
+def start_matchmaking():
+    """30秒経過したらCOMを追加してマッチングを開始"""
+    global waiting_players
+    if not waiting_players:
+        return
 
-# ✅ DB 初期化
-#with app.app_context():
-#    init_db()
+    room_id = f"room_{int(time.time())}"
+    players = waiting_players.copy()
 
-# ✅ Blueprintを登録
-#from app.routes import main
-#app.register_blueprint(main)
+    while len(players) < MAX_PLAYERS:
+        players.append(f"COMPUTER_{len(players)+1}")
 
+    rooms.append({"id": room_id, "players": players})
+    waiting_players.clear()
+
+    for p in players:
+        if not p.startswith("COMPUTER"):
+            socketio.emit("match_found", {"room_id": room_id, "players": players}, to=p)
+
+# ----------------------------
+# SocketIO イベント
+# ----------------------------
+@socketio.on("join_lobby")
+def handle_join(data):
+    """ロビーに参加"""
+    username = data.get("username")
+    if username not in waiting_players:
+        waiting_players.append(username)
+        join_room(username)
+        print(f"{username} joined the lobby.")
+
+    if len(waiting_players) == MAX_PLAYERS:
+        start_matchmaking()
+    elif len(waiting_players) == 1:
+        threading.Timer(WAIT_TIME, start_matchmaking).start()
+
+# ----------------------------
+# Render/Gunicorn 実行
+# ----------------------------
 if __name__ == "__main__":
-    socketio.run(app, host="0.0.0.0", port=5000)
+    socketio.run(app, host="0.0.0.0", port=5000, debug=True)

@@ -83,54 +83,15 @@ def login():
 # ----------------------------
 # ロビーのSocketIO機能
 # ----------------------------
-waiting_players = []
-rooms = []
-MAX_PLAYERS = 4
-WAIT_TIME = 30  # 秒
-
-def start_matchmaking():
-    """30秒経過したらCOMを追加してマッチングを開始"""
-    global waiting_players
-    if not waiting_players:
-        return
-
-    room_id = f"room_{int(time.time())}"
-    players = waiting_players.copy()
-
-    while len(players) < MAX_PLAYERS:
-        players.append(f"COMPUTER_{len(players)+1}")
-
-    rooms.append({"id": room_id, "players": players})
-    waiting_players.clear()
-
-    for p in players:
-        if not p.startswith("COMPUTER"):
-            socketio.emit("match_found", {"room_id": room_id, "players": players}, to=p)
-
-
-@socketio.on("join_lobby")
-def handle_join(data):
-    """ロビーに参加"""
-    username = data.get("username")
-    if username not in waiting_players:
-        waiting_players.append(username)
-        join_room(username)
-        print(f"{username} joined the lobby.")
-
-    if len(waiting_players) == MAX_PLAYERS:
-        start_matchmaking()
-    elif len(waiting_players) == 1:
-        threading.Timer(WAIT_TIME, start_matchmaking).start()
-
 
 # ----------------------------
 # Blueprint登録
 # ----------------------------
-app.register_blueprint(main)
+#app.register_blueprint(main)
 
 # ----------------------------
 # Render実行エントリポイント
 # ----------------------------
 if __name__ == "__main__":
     init_db()
-    socketio.run(app, host="0.0.0.0", port=10000, debug=True)
+    #socketio.run(app, host="0.0.0.0", port=10000, debug=True)

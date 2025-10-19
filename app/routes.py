@@ -8,6 +8,7 @@ import sqlite3
 app = Flask(__name__)
 #main = Blueprint('main', __name__)
 main = Blueprint("main", __name__, template_folder="templates")
+app.secret_key = os.environ.get("SECRET_KEY", "dev_secret_key")
 
 @main.route('/')
 def index():

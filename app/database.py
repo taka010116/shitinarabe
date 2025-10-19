@@ -1,10 +1,11 @@
 import sqlite3
+import os
 
-DB_NAME = "users.db"
+DB_NAME = os.path.join(os.path.dirname(__file__), "users.db")
 
 def get_db():
     conn = sqlite3.connect(DB_NAME)
-    conn.row_factory = sqlite3.Row  # 結果を辞書形式で扱える
+    conn.row_factory = sqlite3.Row
     return conn
 
 def init_db():
@@ -15,15 +16,14 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
             password TEXT NOT NULL,
-            avatar TEXT DEFAULT '(´・ω・`)',     -- アバター
-            bio TEXT DEFAULT '',                   -- 自己紹介文（最大100文字）
-            wins INTEGER DEFAULT 0,                -- 勝ち数
-            losses INTEGER DEFAULT 0,              -- 負け数
-            draws INTEGER DEFAULT 0,               -- 引き分け数
+            avatar TEXT DEFAULT '(´・ω・`)',
+            bio TEXT DEFAULT '',
+            wins INTEGER DEFAULT 0,
+            losses INTEGER DEFAULT 0,
+            draws INTEGER DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
     conn.commit()
     conn.close()
     print("✅ users テーブルを作成または確認しました")
-    

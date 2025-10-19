@@ -3,11 +3,23 @@ from app.database import get_db, init_db
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 import sqlite3 
+from flask_socketio import SocketIO, join_room, emit
+import time
+import threading
 
 # ✅ Flask() は作らない
 # app = Flask(__name__) ← これを削除
 # ✅ 代わりに Blueprint のみを定義
 main = Blueprint("main", __name__, template_folder="templates")
+
+socketio = SocketIO(app, cors_allowed_origins="*")
+
+waiting_players = []  # 待機中のプレイヤー情報
+rooms = []  
+
+
+MAX_PLAYERS = 4
+WAIT_TIME = 30  # 秒
 
 # ✅ users.db がない場合のみ作成
 if not os.path.exists("users.db"):
@@ -133,3 +145,54 @@ def delete_account():
 @main.route("/archive")
 def archive():
     return render_template("archive.html")
+
+@main.route("/lobby")
+def lobby():
+    return render_template("lobby.html")
+
+def start_matchmaking():
+    """30秒経過したらCOMを追加してマッチングを開始"""
+    global waiting_players
+    if not waiting_players:
+        return
+
+    room_id = f"room_{int(time.time())}"
+    players = waiting_players.copy()
+
+    # 30秒以内に4人未満ならCOM追加
+    while len(players) < MAX_PLAYERS:
+        players.append(f"COMPUTER_{len(players)+1}")
+
+    # 部屋を確定
+    rooms.append({"id": room_id, "players": players})
+    waiting_players.clear()
+
+    # 全員に通知
+    for p in players:
+        if not p.startswith("COMPUTER"):
+            socketio.emit("match_found", {"room_id": room_id, "players": players}, to=p)
+
+@socketio.on("join_lobby")
+def handle_join(data):
+    """ロビーに参加"""
+    username = data.get("username")
+    if username not in waiting_players:
+        waiting_players.append(username)
+        join_room(username)
+        print(f"{username} joined the lobby.")
+
+    # 4人揃ったら即スタート
+    if len(waiting_players) == MAX_PLAYERS:
+        start_matchmaking()
+    elif len(waiting_players) == 1:
+        # 最初の人が来たときだけ30秒タイマーを開始
+        threading.Timer(WAIT_TIME, start_matchmaking).start()
+
+@socketio.on("disconnect")
+def handle_disconnect():
+    """接続が切れた場合"""
+    global waiting_players
+    for p in waiting_players:
+        if request.sid == p:
+            waiting_players.remove(p)
+            break

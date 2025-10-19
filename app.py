@@ -14,6 +14,7 @@ DB_NAME = os.environ.get("DB_NAME", "myapp")
 SECRET_KEY = os.environ.get("SECRET_KEY", secrets.token_hex(16))
 
 app = Flask(__name__)
+
 app.secret_key = SECRET_KEY
 
 # コネクションプール
@@ -167,4 +168,6 @@ def delete_account():
     return redirect(url_for("register"))
 
 if __name__ == "__main__":
+    from app.database import init_db
+    init_db()
     app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))

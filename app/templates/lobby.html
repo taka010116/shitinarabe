@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>ロビー</title>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <style>
+    body {
+      text-align: center;
+      font-family: "メイリオ", sans-serif;
+      background-color: #f0f0f0;
+    }
+    .container {
+      background: white;
+      display: inline-block;
+      padding: 40px;
+      margin-top: 100px;
+      border-radius: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+    h1 {
+      color: #333;
+    }
+    #status {
+      margin-top: 20px;
+      font-size: 20px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎮 ロビー</h1>
+    <p>マッチング中です...（最大4人）</p>
+    <p id="status">他のプレイヤーを待っています...</p>
+  </div>
+
+  <script>
+    const socket = io();
+    const username = "{{ session['username'] }}";
+
+    socket.emit("join_lobby", { username: username });
+
+    socket.on("match_found", (data) => {
+      document.getElementById("status").innerText =
+        "マッチング完了！ ゲームを開始します...";
+      console.log("Room:", data.room_id, "Players:", data.players);
+
+      // 3秒後にゲーム画面へ
+      setTimeout(() => {
+        window.location.href = "/game?room_id=" + data.room_id;
+      }, 3000);
+    });
+  </script>
+</body>
+</html>

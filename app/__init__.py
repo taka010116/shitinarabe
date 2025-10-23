@@ -22,6 +22,7 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 # マッチング用の変数
 # ----------------------------
 waiting_players = []
+player_sids = {}
 rooms = []
 MAX_PLAYERS = 4
 WAIT_TIME = 30  # 秒
@@ -30,8 +31,11 @@ WAIT_TIME = 30  # 秒
 # マッチング関数
 # ----------------------------
 def broadcast_lobby_count():
-    socketio.emit("update_lobby_count", {"count": len(waiting_players)}, broadcast=True)
-
+    socketio.emit(
+        "update_lobby_info",
+        {"count": len(waiting_players), "players": waiting_players},
+        broadcast=True
+    )
 
 def start_matchmaking():
     """30秒経過したらCOMを追加してマッチングを開始"""
@@ -40,13 +44,14 @@ def start_matchmaking():
         return
 
     room_id = f"room_{int(time.time())}"
+    players = waiting_players[:MAX_PLAYERS]
     players = waiting_players.copy()
 
     while len(players) < MAX_PLAYERS:
         players.append(f"COMPUTER_{len(players)+1}")
 
     rooms.append({"id": room_id, "players": players})
-    waiting_players.clear()
+    #waiting_players.clear()
 
     for p in players:
         if not p.startswith("COMPUTER"):
@@ -56,14 +61,21 @@ def start_matchmaking():
 # ----------------------------
 # SocketIO イベント
 # ----------------------------
+
+@socketio.on("connect")
+def handle_connect():
+    print("🟢 Client connected")
+
 @socketio.on("join_lobby")
 def handle_join(data):
     """ロビーに参加"""
     username = data.get("username")
+    sid = data.get("sid")
     if username not in waiting_players:
         waiting_players.append(username)
         join_room(username)
         print(f"{username} joined the lobby.")
+        broadcast_lobby_count()
 
     if len(waiting_players) == MAX_PLAYERS:
         start_matchmaking()
@@ -77,12 +89,19 @@ rooms = {}  # room_id -> {"players": [username], "hands": {username: [cards]}, "
 
 @socketio.on("disconnect")
 def handle_disconnect():
-    """ロビーから離脱"""
-    # NOTE: 誰が切断したかを判定するのは難しいので単純化
-    if waiting_players:
-        waiting_players.pop()
-        broadcast_lobby_count()  # ✅ ロビー人数を更新
+    """プレイヤーが離脱"""
+    sid = None
+    username = None
+    # sid -> username の逆引き
+    for s, u in player_sids.items():
+        if s == sid:
+            username = u
+            break
 
+    if username and username in waiting_players:
+        waiting_players.remove(username)
+        print(f"🔴 {username} left the lobby.")
+    broadcast_lobby_count()
 
 
 @socketio.on("join_game")

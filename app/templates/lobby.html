@@ -41,10 +41,10 @@
   </div>
 
   <script>
-        const socket = io();
+        const socket = io("https://shitinarabe.onrender.com/");
 
         // 現在のユーザー名
-        const username = "{{ username }}";
+        const username = "{{ session['username'] }}";cons
 
         // サーバーに参加通知を送る
         socket.emit("join_lobby", { username });

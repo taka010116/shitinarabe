@@ -21,10 +21,6 @@ main = Blueprint("main", __name__, template_folder="templates")
 def index():
     return render_template("index.html")
 
-@main.route("/game")
-def game():
-    return render_template("game.html")
-
 #@main.route("/lobby")
 #def lobby():
 #    return render_template("lobby.html")

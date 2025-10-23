@@ -50,7 +50,7 @@
     // ロビー人数をリアルタイムで更新
     socket.on("update_lobby_count", (data) => {
       const countText = `現在のロビー人数: ${data.count}人`;
-  document.getElementById("playerCount").innerText = countText;
+      document.getElementById("playerCount").innerText = countText;
     });
 
     // マッチングが成立した場合

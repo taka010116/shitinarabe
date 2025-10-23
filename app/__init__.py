@@ -68,20 +68,18 @@ def handle_connect():
 
 @socketio.on("join_lobby")
 def handle_join(data):
-    """ロビーに参加"""
+    """ロビー参加時の処理"""
     username = data.get("username")
-    sid = data.get("sid")
+
+    # 同じユーザーが重複して登録されないようにする
     if username not in waiting_players:
         waiting_players.append(username)
-        join_room(username)
-        print(f"{username} joined the lobby.")
-        broadcast_lobby_count()
 
-    if len(waiting_players) == MAX_PLAYERS:
-        start_matchmaking()
-    elif len(waiting_players) == 1:
-        threading.Timer(WAIT_TIME, start_matchmaking).start()
+    print(f"{username} joined the lobby. 現在の人数: {len(waiting_players)}")
 
+    # 全員に人数を更新
+    broadcast_lobby_count()
+    
 from flask_socketio import join_room, leave_room, emit
 
 rooms = {}  # room_id -> {"players": [username], "hands": {username: [cards]}, "table": {...}}
@@ -117,6 +115,33 @@ def handle_join(data):
     random.shuffle(deck)
     rooms[room]["hands"][username] = deck[:13]
     emit("update_hands", rooms[room]["hands"], room=room)
+
+@socketio.on("leave_lobby")
+def handle_leave(data):
+    """ロビー退出時の処理"""
+    username = data.get("username")
+    if username in waiting_players:
+        waiting_players.remove(username)
+        print(f"{username} left the lobby. 現在の人数: {len(waiting_players)}")
+        broadcast_lobby_count()
+
+
+@socketio.on("start_match")
+def handle_start():
+    """4人揃ったら自動でゲーム開始"""
+    if len(waiting_players) >= 4:
+        selected_players = waiting_players[:4]
+        print("対局開始:", selected_players)
+
+        # 残りの人をロビーに残す
+        del waiting_players[:4]
+
+        # 全員にゲーム開始通知
+        socketio.emit("match_started", {"players": selected_players}, namespace="/")
+
+        # 人数更新（残りのロビー人数を送信）
+        broadcast_lobby_count()
+
 
 @socketio.on("play_card")
 def handle_play(data):

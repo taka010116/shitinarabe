@@ -41,28 +41,40 @@
   </div>
 
   <script>
-    const socket = io();
-    const username = "{{ session['username'] }}";
+        const socket = io();
 
-    // サーバーに参加を通知
-    socket.emit("join_lobby", { username: username });
+        // 現在のユーザー名
+        const username = "{{ username }}";
 
-    // ロビー人数をリアルタイムで更新
-    socket.on("update_lobby_count", (data) => {
-      const countText = `現在のロビー人数: ${data.count}人`;
-      document.getElementById("playerCount").innerText = countText;
-    });
+        // サーバーに参加通知を送る
+        socket.emit("join_lobby", { username });
 
-    // マッチングが成立した場合
-    socket.on("match_found", (data) => {
-      document.getElementById("status").innerText =
-        "マッチング完了！ ゲームを開始します...";
-      console.log("Room:", data.room_id, "Players:", data.players);
+        // ロビー情報更新時
+        socket.on("update_lobby_info", data => {
+            document.getElementById("playerCount").textContent = data.count;
+            const list = document.getElementById("playerList");
+            list.innerHTML = "";
+            data.players.forEach(p => {
+                const li = document.createElement("li");
+                li.textContent = p;
+                list.appendChild(li);
+            });
+        });
 
-      setTimeout(() => {
-        window.location.href = "/game?room_id=" + data.room_id;
-      }, 3000);
-    });
-  </script>
+        // 対局開始ボタン
+        document.getElementById("startBtn").onclick = () => {
+            socket.emit("start_match");
+        };
+
+        // ゲーム開始通知
+        socket.on("match_started", data => {
+            alert(`対局開始！参加者: ${data.players.join(", ")}`);
+        });
+
+        // ページを離れるときに退出を通知
+        window.addEventListener("beforeunload", () => {
+            socket.emit("leave_lobby", { username });
+        });
+    </script>
 </body>
 </html>

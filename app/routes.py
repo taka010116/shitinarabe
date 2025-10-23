@@ -132,6 +132,17 @@ def lobby():
         return redirect(url_for("main.login"))
 
     return render_template("lobby.html")  # ロビー画面
+
+#ここからゲーム
+@main.route("/game")
+def game():
+    if "user_id" not in session:
+        flash("ログインしてください")
+        return redirect(url_for("main.login"))
+    return render_template("game.html", username=session["username"])
+
+
+
 # ----------------------------
 # ロビーのSocketIO機能
 # ----------------------------

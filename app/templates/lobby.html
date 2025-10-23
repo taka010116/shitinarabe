@@ -21,10 +21,14 @@
     h1 {
       color: #333;
     }
-    #status {
+    #status, #playerCount {
       margin-top: 20px;
       font-size: 20px;
       color: #666;
+    }
+    #playerCount {
+      font-weight: bold;
+      color: #333;
     }
   </style>
 </head>
@@ -32,6 +36,7 @@
   <div class="container">
     <h1>🎮 ロビー</h1>
     <p>マッチング中です...（最大4人）</p>
+    <p id="playerCount">現在のロビー人数: 1人</p>
     <p id="status">他のプレイヤーを待っています...</p>
   </div>
 
@@ -39,14 +44,21 @@
     const socket = io();
     const username = "{{ session['username'] }}";
 
+    // サーバーに参加を通知
     socket.emit("join_lobby", { username: username });
 
+    // ロビー人数をリアルタイムで更新
+    socket.on("update_lobby_count", (data) => {
+      const countText = `現在のロビー人数: ${data.count}人`;
+  document.getElementById("playerCount").innerText = countText;
+    });
+
+    // マッチングが成立した場合
     socket.on("match_found", (data) => {
       document.getElementById("status").innerText =
         "マッチング完了！ ゲームを開始します...";
       console.log("Room:", data.room_id, "Players:", data.players);
 
-      // 3秒後にゲーム画面へ
       setTimeout(() => {
         window.location.href = "/game?room_id=" + data.room_id;
       }, 3000);

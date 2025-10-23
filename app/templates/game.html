@@ -1,102 +1,58 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>ロビー</title>
-  <style>
-    body { font-family: sans-serif; }
-    #login, #lobby { display: none; }
-    #startBtn { display: none; margin-top: 20px; }
-  </style>
+<meta charset="UTF-8">
+<title>七並べ</title>
+<script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+<style>
+#hand { margin: 20px; }
+.card { display: inline-block; width: 60px; height: 90px; border: 1px solid #000; text-align:center; line-height:90px; margin: 3px; cursor:pointer; }
+#table { margin: 20px; }
+.suit { margin: 10px 0; }
+</style>
 </head>
 <body>
-  <h1>ロビー</h1>
+<h1>オンライン七並べ</h1>
+<div id="table">
+    <div class="suit" id="hearts"></div>
+    <div class="suit" id="spades"></div>
+    <div class="suit" id="diamonds"></div>
+    <div class="suit" id="clubs"></div>
+</div>
 
-  <div id="login">
-    <input type="text" id="username" placeholder="ユーザー名を入力（任意）">
-    <input type="text" id="password" placeholder="あいことばを入力">
-    <button id="enterBtn">ロビーに入る</button>
-    <p id="loginMsg"></p>
-  </div>
+<h3>あなたの手札</h3>
+<div id="hand"></div>
 
-  <div id="lobby">
-    <h2>ロビー</h2>
-    <p>プレイヤー一覧:</p>
-    <ul id="players"></ul>
-    <button id="startBtn">開始！</button>
-    
-  </div>
+<script>
+const socket = io();
 
-  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-  <script>
-    const loginDiv = document.getElementById('login');
-    const lobbyDiv = document.getElementById('lobby');
-    const usernameInput = document.getElementById('username');
-    const passwordInput = document.getElementById('password');
-    const enterBtn = document.getElementById('enterBtn');
-    const loginMsg = document.getElementById('loginMsg');
-    const playersList = document.getElementById('players');
-    const startBtn = document.getElementById('startBtn');
+const username = "{{ username }}";
+const room = "room1";  // 簡易版: 固定ルーム
 
-    const socket = io();
-    let currentPassword = "";
-    let currentUsername = "";
-    let isLeader = false;
+socket.emit("join_game", {username, room});
 
-    loginDiv.style.display = 'block';
-
-    function generateRandomUsername() {
-      return "Player" + Math.floor(Math.random() * 1000);
-    }
-
-    enterBtn.addEventListener('click', () => {
-      currentPassword = passwordInput.value;
-      currentUsername = usernameInput.value || generateRandomUsername();
-      console.log("開始ボタンを押しました。");
-      socket.emit("join", {
-        password: currentPassword,
-        username: currentUsername
-       });
-    });
-
-    socket.on("login_result", (data) => {
-      if(data.status === "waiting"){
-        loginMsg.textContent = "接続中...";
-      }
-      if(data.status === "ready"){
-        loginDiv.style.display = 'none';
-        lobbyDiv.style.display = 'block';
-        isLeader = data.isLeader;
-        if(isLeader){
-          startBtn.style.display = 'block';
+socket.on("update_hands", hands => {
+    const myHand = hands[username];
+    const handDiv = document.getElementById("hand");
+    handDiv.innerHTML = "";
+    myHand.forEach(card => {
+        const c = document.createElement("div");
+        c.className = "card";
+        c.textContent = card;
+        c.onclick = () => {
+            socket.emit("play_card", {username, room, card});
         }
-      }
+        handDiv.appendChild(c);
     });
+});
 
-    socket.on("update_players", (data) => {
-      playersList.innerHTML = '';
-      data.players.forEach(p => {
-        const li = document.createElement('li');
-        li.textContent = p;
-        playersList.appendChild(li);
-      });
-    });
-
-    startBtn.addEventListener('click', () => {
-      if(isLeader){
-        currentPassword = passwordInput.value.trim();
-        console.log("開始ボタンを押しました！")
-        console.log("password : " + currentPassword);
-        socket.emit("start_game", { password: currentPassword });
-        localStorage.setItem("gamePassword", currentPassword);
-        socket.emit("join", { password: currentPassword });
-      }
-    });
-
-    socket.on("game_start", () => {
-      const password = encodeURIComponent(currentPassword);
-      window.location.href = `/game1?password=${password}`;
-    });
-  </script>
+socket.on("card_played", data => {
+    // 場の更新
+    for (const suit in data.table) {
+        const suitDiv = document.getElementById(suit.toLowerCase());
+        suitDiv.textContent = data.table[suit].join(" ");
+    }
+});
+</script>
 </body>
 </html>

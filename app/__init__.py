@@ -16,8 +16,9 @@ with app.app_context():
 app.register_blueprint(main)
 
 # SocketIO 初期化
-socketio = SocketIO(app, cors_allowed_origins="*")
+#socketio = SocketIO(app, cors_allowed_origins="*")
 
+socketio = SocketIO(app)
 # ----------------------------
 # マッチング用の変数
 # ----------------------------
@@ -81,7 +82,7 @@ def handle_join(data):
     socketio.emit(
         "update_lobby_info",
         {"count": len(waiting_players), "players": waiting_players},
-        room="lobby"  # lobby ルーム全体に送信
+        broadcast=True
     )
     # 全員に人数を更新
     broadcast_lobby_count()

@@ -34,7 +34,7 @@ def broadcast_lobby_count():
     socketio.emit(
         "update_lobby_info",
         {"count": len(waiting_players), "players": waiting_players},
-        broadcast=True
+        to=None
     )
 
 def start_matchmaking():

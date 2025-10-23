@@ -45,12 +45,13 @@
 
         // 現在のユーザー名
         const username = "{{ session['username'] }}";
-        
+
 
         // サーバーに参加通知を送る
         socket.emit("join_lobby", { username });
 
         // ロビー情報更新時
+        /*
         socket.on("update_lobby_info", data => {
             document.getElementById("playerCount").textContent = data.count;
             const list = document.getElementById("playerList");
@@ -61,7 +62,34 @@
                 list.appendChild(li);
             });
         });
+        */
 
+        // ロビー情報更新時
+socket.on("update_lobby_info", data => {
+    // 現在の人数表示
+    const playerCountElem = document.getElementById("playerCount");
+    if (playerCountElem) {
+        playerCountElem.textContent = data.count;
+    }
+
+    // プレイヤーリスト更新
+    const playerListElem = document.getElementById("playerList");
+    if (playerListElem) {
+        // 一旦空にする
+        playerListElem.innerHTML = "";
+
+        // DocumentFragment を使って一括追加（パフォーマンス向上）
+        const fragment = document.createDocumentFragment();
+        data.players.forEach(p => {
+            const li = document.createElement("li");
+            li.textContent = p;
+            fragment.appendChild(li);
+        });
+        playerListElem.appendChild(fragment);
+    }
+});
+
+      
         // 対局開始ボタン
         document.getElementById("startBtn").onclick = () => {
             socket.emit("start_match");

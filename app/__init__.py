@@ -77,6 +77,12 @@ def handle_join(data):
 
     print(f"{username} joined the lobby. 現在の人数: {len(waiting_players)}")
 
+    join_room("lobby")
+    socketio.emit(
+        "update_lobby_info",
+        {"count": len(waiting_players), "players": waiting_players},
+        room="lobby"  # lobby ルーム全体に送信
+    )
     # 全員に人数を更新
     broadcast_lobby_count()
     

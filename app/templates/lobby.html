@@ -44,7 +44,8 @@
         const socket = io("https://shitinarabe.onrender.com/");
 
         // 現在のユーザー名
-        const username = "{{ session['username'] }}";cons
+        const username = "{{ session['username'] }}";
+        
 
         // サーバーに参加通知を送る
         socket.emit("join_lobby", { username });

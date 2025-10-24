@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request
 from flask_socketio import SocketIO, join_room, leave_room, emit
 from app.routes import main
 from app.database import init_db
@@ -16,9 +16,9 @@ with app.app_context():
 app.register_blueprint(main)
 
 # SocketIO 初期化
-#socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*")
 
-socketio = SocketIO(app)
+#socketio = SocketIO(app)
 # ----------------------------
 # マッチング用の変数
 # ----------------------------
@@ -32,6 +32,7 @@ WAIT_TIME = 30  # 秒
 # マッチング関数
 # ----------------------------
 def broadcast_lobby_count():
+    print("count", len(waiting_players))
     socketio.emit(
         "update_lobby_info",
         {"count": len(waiting_players), "players": waiting_players},
@@ -46,7 +47,7 @@ def start_matchmaking():
 
     room_id = f"room_{int(time.time())}"
     players = waiting_players[:MAX_PLAYERS]
-    players = waiting_players.copy()
+    #players = waiting_players.copy()
 
     while len(players) < MAX_PLAYERS:
         players.append(f"COMPUTER_{len(players)+1}")
@@ -71,7 +72,8 @@ def handle_connect():
 def handle_join(data):
     """ロビー参加時の処理"""
     username = data.get("username")
-
+    sid = request.sid
+    player_sids[username] = sid
     # 同じユーザーが重複して登録されないようにする
     if username not in waiting_players:
         waiting_players.append(username)
@@ -82,7 +84,7 @@ def handle_join(data):
     socketio.emit(
         "update_lobby_info",
         {"count": len(waiting_players), "players": waiting_players},
-        broadcast=True
+        to=None
     )
     # 全員に人数を更新
     broadcast_lobby_count()

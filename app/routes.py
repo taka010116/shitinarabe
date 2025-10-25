@@ -3,6 +3,7 @@ from app.database import get_db, init_db
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_socketio import SocketIO, join_room, emit
 import os, sqlite3, time, threading
+import psycopg2
 
 # Flaskアプリを先に作る
 #app = Flask(__name__)
@@ -13,6 +14,19 @@ import os, sqlite3, time, threading
 
 # Blueprint定義
 main = Blueprint("main", __name__, template_folder="templates")
+
+app = Flask(__name__)
+app.secret_key = "secret-key"  # セッション用キー
+
+# 🔹 Renderの環境変数からデータベースURLを取得
+DATABASE_URL = os.getenv("postgresql://takanami:NknWfypeq70O4aKab0tHZTXXKdGsJz3b@dpg-d3u927uuk2gs73dm85kg-a.oregon-postgres.render.com/mydb_6t0u")
+
+def get_db_connection():
+    conn = psycopg2.connect(DATABASE_URL, sslmode="require")
+    print("getDB")
+    return conn
+
+
 
 # ----------------------------
 # ルート定義（ここから下）
@@ -37,43 +51,54 @@ else:
 # ----------------------------
 # 登録・ログインなど
 # ----------------------------
-@main.route("/register", methods=["GET", "POST"])
+@app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
-        conn = get_db()
-        c = conn.cursor()
-        try:
-            c.execute("INSERT INTO users (username, password) VALUES (?, ?)",
-                      (username, generate_password_hash(password)))
+
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        # 同名ユーザーの存在確認
+        cur.execute("SELECT * FROM users WHERE username = %s;", (username,))
+        existing_user = cur.fetchone()
+
+        if existing_user:
+            flash("このユーザー名はすでに使われています。")
+        else:
+            cur.execute("INSERT INTO users (username, password) VALUES (%s, %s);", (username, password))
             conn.commit()
             flash("登録が完了しました！ログインしてください。")
-            return redirect(url_for("main.login"))
-        except:
-            flash("このユーザー名はすでに使われています。")
-        finally:
+            cur.close()
             conn.close()
+            return redirect(url_for("login"))
+
+        cur.close()
+        conn.close()
+
     return render_template("register.html")
 
-
-@main.route("/login", methods=["GET", "POST"])
+# 🔹 ログインページ（簡易版）
+@app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
-        conn = get_db()
-        c = conn.cursor()
-        c.execute("SELECT * FROM users WHERE username=?", (username,))
-        user = c.fetchone()
+
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM users WHERE username = %s AND password = %s;", (username, password))
+        user = cur.fetchone()
+        cur.close()
         conn.close()
-        if user and check_password_hash(user["password"], password):
-            session["user_id"] = user["id"]
-            session["username"] = user["username"]
-            flash("ログイン成功！")
-            return redirect(url_for("main.account"))  # ロビーへ移動
+
+        if user:
+            flash(f"ようこそ、{username}さん！")
+            return redirect(url_for("home"))
         else:
-            flash("ユーザー名またはパスワードが間違っています。")
+            flash("ユーザー名またはパスワードが違います。")
+
     return render_template("login.html")
 
 @main.route("/account")

@@ -19,7 +19,7 @@ app = Flask(__name__)
 app.secret_key = "secret-key"  # セッション用キー
 
 # 🔹 Renderの環境変数からデータベースURLを取得
-DATABASE_URL = os.getenv("postgresql://takanami:NknWfypeq70O4aKab0tHZTXXKdGsJz3b@dpg-d3u927uuk2gs73dm85kg-a.oregon-postgres.render.com/mydb_6t0u")
+DATABASE_URL = "postgresql://takanami:NknWfypeq70O4aKab0tHZTXXKdGsJz3b@dpg-d3u927uuk2gs73dm85kg-a.oregon-postgres.render.com/mydb_6t0u"
 
 def get_db_connection():
     conn = psycopg2.connect(DATABASE_URL, sslmode="require")

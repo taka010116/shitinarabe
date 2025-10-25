@@ -51,7 +51,7 @@ else:
 # ----------------------------
 # 登録・ログインなど
 # ----------------------------
-@app.route("/register", methods=["GET", "POST"])
+@main.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
         username = request.form["username"]
@@ -80,7 +80,7 @@ def register():
     return render_template("register.html")
 
 # 🔹 ログインページ（簡易版）
-@app.route("/login", methods=["GET", "POST"])
+@main.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
         username = request.form["username"]

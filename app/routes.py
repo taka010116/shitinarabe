@@ -130,7 +130,7 @@ def update_account():
 
     username = session["username"]
     new_bio = request.form.get("bio", "")
-    new_avatar = request.form.get("avatar", "(´・ω・`)")  # 必要であれば avatar も更新可能
+    new_avatar = request.form.get("avatar", "(´・ω・`)")
 
     conn = get_db_connection()
     cur = conn.cursor()

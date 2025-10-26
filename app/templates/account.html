@@ -81,23 +81,20 @@
 <body>
   <div class="container">
     <h1>こんにちは、{{ username }} さん</h1>
-
+    
     <h3>現在のアバター：</h3>
     <p style="font-size:40px;">{{ avatar }}</p>
 
-     <p>
-      <a href="{{ url_for('main.game') }}" class="link-button">🎮 ロビーへ行く</a>
-    </p>
-    
     <form action="{{ url_for('main.update_account') }}" method="POST">
-      <h3>アバターを選択：</h3>
+      <!-- <h3>アバターを選択：</h3>
       <div>
         <span id="avatar_(´・ω・`)" class="avatar" onclick="selectAvatar('(´・ω・`)')">(´・ω・`)</span>
         <span id="avatar_('ω')" class="avatar" onclick="selectAvatar('(iωi)')">('ω')</span>
         <span id="avatar_(;∀;)" class="avatar" onclick="selectAvatar('( ;∀;)')">( ;∀;)</span>
       </div>
+    
       <input type="hidden" id="avatarInput" name="avatar" value="{{ avatar }}">
-
+-->
       <h3>自己紹介文（100文字まで）：</h3>
       <textarea name="bio" maxlength="100">{{ bio }}</textarea>
       <br>

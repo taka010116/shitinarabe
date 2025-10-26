@@ -65,11 +65,11 @@
         */
 
         // ロビー情報更新時
-socket.on("update_lobby_info", data => {
+        socket.on("update_lobby_info", data => {
     const playerCountElem = document.getElementById("playerCount");
     const playerListElem = document.getElementById("playerList");
 
-    if (playerCountElem) playerCountElem.textContent = data.count;
+    if (playerCountElem) playerCountElem.textContent = data.count + "人が待機中...";
     if (playerListElem) {
         playerListElem.innerHTML = "";
         data.players.forEach(p => {

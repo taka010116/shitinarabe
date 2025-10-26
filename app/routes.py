@@ -137,7 +137,7 @@ def update_account():
 
 @main.route("/account/delete", methods=["POST"])
 def delete_account():
-    if "user_id" not in session:
+    if "username" not in session:
         flash("ログインしてください")
         return redirect(url_for("main.login"))
 
@@ -163,7 +163,7 @@ def lobby():
 #ここからゲーム
 @main.route("/game")
 def game():
-    if "user_id" not in session:
+    if "username" not in session:
         flash("ログインしてください")
         return redirect(url_for("main.login"))
     return render_template("game.html", username=session["username"])

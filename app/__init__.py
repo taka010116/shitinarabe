@@ -33,13 +33,16 @@ WAIT_TIME = 30  # 秒
 # ----------------------------
 def broadcast_lobby_count():
     print("count", len(waiting_players))
+    if len(waiting_players) > 3:
+        start_matching()
+    
     socketio.emit(
         "update_lobby_info",
         {"count": len(waiting_players), "players": waiting_players},
         to=None
     )
 
-def start_matchmaking():
+def start_matching():
     """30秒経過したらCOMを追加してマッチングを開始"""
     global waiting_players
     if not waiting_players:
@@ -74,7 +77,6 @@ def handle_join(data):
     username = data.get("username")
     sid = request.sid
     player_sids[username] = sid
-    # 同じユーザーが重複して登録されないようにする
     if username not in waiting_players:
         waiting_players.append(username)
 

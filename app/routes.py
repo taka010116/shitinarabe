@@ -95,21 +95,42 @@ def login():
 
         if user:
             flash(f"ようこそ、{username}さん！")
+            session['username'] = username
             return redirect(url_for("main.account"))
         else:
             flash("ユーザー名またはパスワードが違います。")
 
     return render_template("login.html")
 
-@main.route("/account")
+@app.route('/account')
 def account():
-    if "user_id" not in session:
-        flash("ログインしてください")
-        return redirect(url_for("main.account"))
+    if 'username' not in session:
+        flash('ログインしてください。')
+        return redirect(url_for('login'))
 
-    user_id = session["user_id"]
-    username = session["username"]
-    return render_template("account.html", user_id=user_id, username=username)
+    username = session['username']
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT username, avatar, bio, wins, losses, draws
+        FROM users WHERE username = %s
+    """, (username,))
+    user = cur.fetchone()
+    cur.close()
+    conn.close()
+
+    if not user:
+        flash('ユーザー情報が見つかりません。')
+        return redirect(url_for('login'))
+
+    return render_template('account.html',
+                           username=user[0],
+                           avatar=user[1],
+                           bio=user[2],
+                           wins=user[3],
+                           losses=user[4],
+                           draws=user[5])
 
 @main.route("/account/update", methods=["POST"])
 def update_account():

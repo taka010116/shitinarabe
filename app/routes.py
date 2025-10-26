@@ -96,7 +96,7 @@ def login():
         if user:
             flash(f"ようこそ、{username}さん！")
             session['username'] = username
-            return redirect(url_for("main.account"))
+            return redirect(url_for("account"))
         else:
             flash("ユーザー名またはパスワードが違います。")
 

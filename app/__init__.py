@@ -3,6 +3,8 @@ from flask_socketio import SocketIO, join_room, leave_room, emit
 from app.routes import main
 from app.database import init_db
 import os, threading, time
+import random
+import uuid
 
 # Flask アプリ作成
 app = Flask(__name__)
@@ -79,6 +81,7 @@ def handle_join(data):
     player_sids[username] = sid
     if username not in waiting_players:
         waiting_players.append(username)
+        print("waitingに人を入れた")
 
     print(f"{username} joined the lobby. 現在の人数: {len(waiting_players)}")
 

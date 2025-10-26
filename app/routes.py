@@ -96,13 +96,13 @@ def login():
         if user:
             flash(f"ようこそ、{username}さん！")
             session['username'] = username
-            return redirect(url_for("account"))
+            return redirect(url_for("main.account"))
         else:
             flash("ユーザー名またはパスワードが違います。")
 
     return render_template("login.html")
 
-@app.route('/account')
+@main.route('/account')
 def account():
     if 'username' not in session:
         flash('ログインしてください。')

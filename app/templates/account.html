@@ -81,7 +81,7 @@
 <body>
   <div class="container">
     <h1>こんにちは、{{ username }} さん</h1>
-    
+
     <h3>現在のアバター：</h3>
     <p style="font-size:40px;">{{ avatar }}</p>
 
@@ -120,6 +120,5 @@
   <form action="{{ url_for('main.lobby') }}" method="get">
         <button type="submit">対局開始</button>
     </form>
-    
 </body>
 </html>

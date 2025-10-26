@@ -25,10 +25,6 @@ def get_db_connection():
     return conn
 
 
-
-# ----------------------------
-# ルート定義（ここから下）
-# ----------------------------
 @main.route("/")
 def index():
     return render_template("index.html")
@@ -39,9 +35,6 @@ if not os.path.exists("users.db"):
 else:
     print("✅ users.db は既に存在します")
 
-# ----------------------------
-# 登録・ログインなど
-# ----------------------------
 @main.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
@@ -51,7 +44,7 @@ def register():
         conn = get_db_connection()
         cur = conn.cursor()
 
-        # 同名ユーザーの存在確認
+        #同名ユーザーの存在確認
         cur.execute("SELECT * FROM users WHERE username = %s;", (username,))
         existing_user = cur.fetchone()
 
@@ -60,7 +53,7 @@ def register():
         else:
             cur.execute("INSERT INTO users (username, password) VALUES (%s, %s);", (username, password))
             conn.commit()
-            flash("登録が完了しました！ログインしてください。")
+            flash("登録が完了しました")
             cur.close()
             conn.close()
             return redirect(url_for("main.login"))
@@ -161,9 +154,9 @@ def delete_account():
 
 @main.route("/lobby")
 def lobby():
-    if "user_id" not in session:
+    if "username" not in session:
         flash("ログインしてください")
-        return redirect(url_for("main.login"))
+        return redirect(url_for("main.lobby"))
 
     return render_template("lobby.html")  # ロビー画面
 

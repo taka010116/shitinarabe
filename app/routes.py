@@ -72,12 +72,12 @@ def register():
             flash("登録が完了しました！ログインしてください。")
             cur.close()
             conn.close()
-            return redirect(url_for("login"))
+            return redirect(url_for("main.login"))
 
         cur.close()
         conn.close()
 
-    return render_template("main.register.html")
+    return render_template("register.html")
 
 # 🔹 ログインページ（簡易版）
 @main.route("/login", methods=["GET", "POST"])
@@ -95,11 +95,11 @@ def login():
 
         if user:
             flash(f"ようこそ、{username}さん！")
-            return redirect(url_for("home"))
+            return redirect(url_for("main.account"))
         else:
             flash("ユーザー名またはパスワードが違います。")
 
-    return render_template("main.login.html")
+    return render_template("login.html")
 
 @main.route("/account")
 def account():

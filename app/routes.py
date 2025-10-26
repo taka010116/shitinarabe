@@ -77,7 +77,7 @@ def register():
         cur.close()
         conn.close()
 
-    return render_template("register.html")
+    return render_template("main.register.html")
 
 # 🔹 ログインページ（簡易版）
 @main.route("/login", methods=["GET", "POST"])
@@ -99,7 +99,7 @@ def login():
         else:
             flash("ユーザー名またはパスワードが違います。")
 
-    return render_template("login.html")
+    return render_template("main.login.html")
 
 @main.route("/account")
 def account():

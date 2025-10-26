@@ -12,13 +12,11 @@ import psycopg2
 # SocketIOの初期化
 #socketio = SocketIO(app, cors_allowed_origins="*")
 
-# Blueprint定義
 main = Blueprint("main", __name__, template_folder="templates")
 
 app = Flask(__name__)
-app.secret_key = "secret-key"  # セッション用キー
+app.secret_key = "secret-key"  #セッション用キー
 
-# 🔹 Renderの環境変数からデータベースURLを取得
 DATABASE_URL = "postgresql://takanami:NknWfypeq70O4aKab0tHZTXXKdGsJz3b@dpg-d3u927uuk2gs73dm85kg-a.oregon-postgres.render.com/mydb_6t0u"
 
 def get_db_connection():
@@ -35,13 +33,6 @@ def get_db_connection():
 def index():
     return render_template("index.html")
 
-#@main.route("/lobby")
-#def lobby():
-#    return render_template("lobby.html")
-
-# ----------------------------
-# データベース初期化
-# ----------------------------
 if not os.path.exists("users.db"):
     print("🗂 users.db が存在しないため作成します...")
     init_db()
@@ -79,7 +70,6 @@ def register():
 
     return render_template("register.html")
 
-# 🔹 ログインページ（簡易版）
 @main.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -134,19 +124,21 @@ def account():
 
 @main.route("/account/update", methods=["POST"])
 def update_account():
-    if "user_id" not in session:
+    if "username" not in session:
         flash("ログインしてください")
         return redirect(url_for("main.login"))
 
-    username = request.form["username"]
-    # ここで DB 更新処理
-    conn = get_db()
-    c = conn.cursor()
-    c.execute("UPDATE users SET username=? WHERE id=?", (username, session["user_id"]))
+    username = session["username"]
+    new_bio = request.form.get("bio", "")
+    new_avatar = request.form.get("avatar", "(´・ω・`)")  # 必要であれば avatar も更新可能
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("UPDATE users SET bio=%s, avatar=%s WHERE username=%s;", (new_bio, new_avatar, username))
     conn.commit()
+    cur.close()
     conn.close()
 
-    session["username"] = username  # セッション更新
     flash("アカウント情報を更新しました")
     return redirect(url_for("main.account"))
 

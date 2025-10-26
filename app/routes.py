@@ -105,7 +105,7 @@ def login():
 def account():
     if "user_id" not in session:
         flash("ログインしてください")
-        return redirect(url_for("main.login"))
+        return redirect(url_for("main.account"))
 
     user_id = session["user_id"]
     username = session["username"]

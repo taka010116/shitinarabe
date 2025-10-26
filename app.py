@@ -68,6 +68,7 @@ def index():
     return render_template("index.html", user=user)
 
 # 登録ページ
+"""
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
@@ -140,6 +141,7 @@ def account():
     csrf = generate_csrf()
     return render_template("account.html", user=user, csrf=csrf)
 
+"""
 # アカウント削除（POSTのみ）
 @app.route("/delete_account", methods=["POST"])
 def delete_account():

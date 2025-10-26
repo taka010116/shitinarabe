@@ -37,6 +37,7 @@ def broadcast_lobby_count():
     print("count", len(waiting_players))
     if len(waiting_players) > 3:
         start_matching()
+        print("マッチング開始")
     
     socketio.emit(
         "update_lobby_info",
@@ -47,15 +48,15 @@ def broadcast_lobby_count():
 def start_matching():
     """30秒経過したらCOMを追加してマッチングを開始"""
     global waiting_players
-    if not waiting_players:
-        return
+    #if not waiting_players:
+    #    return
 
     room_id = f"room_{int(time.time())}"
     players = waiting_players[:MAX_PLAYERS]
     #players = waiting_players.copy()
 
-    while len(players) < MAX_PLAYERS:
-        players.append(f"COMPUTER_{len(players)+1}")
+    #while len(players) < MAX_PLAYERS:
+    #    players.append(f"COMPUTER_{len(players)+1}")
 
     rooms.append({"id": room_id, "players": players})
     #waiting_players.clear()
@@ -63,7 +64,7 @@ def start_matching():
     for p in players:
         if not p.startswith("COMPUTER"):
             socketio.emit("match_found", {"room_id": room_id, "players": players}, to=p)
-
+            print("マッチングしました")
     broadcast_lobby_count()
 # ----------------------------
 # SocketIO イベント

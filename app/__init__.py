@@ -108,11 +108,11 @@ def handle_join(data):
     
 from flask_socketio import join_room, leave_room, emit
 
-rooms = {}  # room_id -> {"players": [username], "hands": {username: [cards]}, "table": {...}}
+#rooms = {}  # room_id -> {"players": [username], "hands": {username: [cards]}, "table": {...}}
 
 
 @socketio.on("disconnect")
-def handle_disconnect():
+def handle_disconnect(sid):
     """プレイヤーが離脱"""
     sid = None
     username = None
@@ -122,9 +122,12 @@ def handle_disconnect():
             username = u
             break
 
-    if username and username in waiting_players:
-        waiting_players.remove(username)
-        print(f"🔴 {username} left the lobby.")
+    if username:
+        print(f"🔴 {username} disconnected")
+        if username in waiting_players:
+            waiting_players.remove(username)
+        player_sids.pop(username, None)
+
     broadcast_lobby_count()
 
 

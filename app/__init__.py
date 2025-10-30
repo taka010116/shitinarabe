@@ -36,7 +36,7 @@ WAIT_TIME = 30  # 秒
 def broadcast_lobby_count():
     print("count", len(waiting_players))
     print("🔹 ロビーにいるユーザー:", waiting_players)  # デバッグ用
-    
+
     if len(waiting_players) > 3:
         start_matching()
         print("マッチング開始")
@@ -87,6 +87,9 @@ def handle_join(data):
         waiting_players.append(username)
         print("waitingに人を入れた")
         print(f"🟢 {username} joined the lobby")
+
+    else:
+        print("入れなかった")
 
     print(f"{username} joined the lobby. 現在の人数: {len(waiting_players)}")
     print(f"🔹 ロビーにいるユーザー: {waiting_players}")

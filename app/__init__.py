@@ -60,8 +60,10 @@ def start_matching():
     #while len(players) < MAX_PLAYERS:
     #    players.append(f"COMPUTER_{len(players)+1}")
 
-    rooms.append({"id": room_id, "players": players})
-    #waiting_players.clear()
+    #rooms.append({"id": room_id, "players": players})
+    rooms[room_id] = {"players": players, "hands": {}, "table": {"hearts":[], "spades":[], "diamonds":[], "clubs":[]}}
+
+#waiting_players.clear()
 
     for p in players:
         if not p.startswith("COMPUTER"):

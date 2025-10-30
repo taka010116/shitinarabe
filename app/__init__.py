@@ -70,7 +70,7 @@ def start_matching():
         if not p.startswith("COMPUTER"):
             socketio.emit("match_found", {"room_id": room_id, "players": players}, to=p)
             print("マッチングしました")
-    broadcast_lobby_count()
+    #broadcast_lobby_count()
 # ----------------------------
 # SocketIO イベント
 # ----------------------------

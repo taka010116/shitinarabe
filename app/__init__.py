@@ -82,6 +82,7 @@ def handle_join(data):
     username = data.get("username")
     sid = request.sid
     player_sids[username] = sid
+    print(f"🟢 {username}を入れる。")
 
     if username not in waiting_players:
         waiting_players.append(username)

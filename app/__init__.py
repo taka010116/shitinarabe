@@ -60,8 +60,9 @@ def start_matching():
     #while len(players) < MAX_PLAYERS:
     #    players.append(f"COMPUTER_{len(players)+1}")
 
-    #rooms.append({"id": room_id, "players": players})
-    rooms[room_id] = {"players": players, "hands": {}, "table": {"hearts":[], "spades":[], "diamonds":[], "clubs":[]}}
+    
+    rooms.append({"id": room_id, "players": players})
+    #rooms[room_id] = {"players": players, "hands": {}, "table": {"hearts":[], "spades":[], "diamonds":[], "clubs":[]}}
 
 #waiting_players.clear()
 
@@ -112,9 +113,9 @@ from flask_socketio import join_room, leave_room, emit
 
 
 @socketio.on("disconnect")
-def handle_disconnect(sid):
+def handle_disconnect():
     """プレイヤーが離脱"""
-    sid = None
+    sid = request.sid
     username = None
     # sid -> username の逆引き
     for s, u in player_sids.items():

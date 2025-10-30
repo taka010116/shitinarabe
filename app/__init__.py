@@ -35,6 +35,8 @@ WAIT_TIME = 30  # 秒
 # ----------------------------
 def broadcast_lobby_count():
     print("count", len(waiting_players))
+    print("🔹 ロビーにいるユーザー:", waiting_players)  # デバッグ用
+    
     if len(waiting_players) > 3:
         start_matching()
         print("マッチング開始")
@@ -80,11 +82,14 @@ def handle_join(data):
     username = data.get("username")
     sid = request.sid
     player_sids[username] = sid
+
     if username not in waiting_players:
         waiting_players.append(username)
         print("waitingに人を入れた")
+        print(f"🟢 {username} joined the lobby")
 
     print(f"{username} joined the lobby. 現在の人数: {len(waiting_players)}")
+    print(f"🔹 ロビーにいるユーザー: {waiting_players}")
 
     join_room("lobby")
     socketio.emit(

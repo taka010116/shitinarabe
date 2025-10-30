@@ -4,6 +4,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_socketio import SocketIO, join_room, emit
 import os, sqlite3, time, threading
 import psycopg2
+from werkzeug.security import generate_password_hash
+from werkzeug.security import check_password_hash
 
 # Flaskアプリを先に作る
 #app = Flask(__name__)
@@ -51,7 +53,9 @@ def register():
         if existing_user:
             flash("このユーザー名はすでに使われています。")
         else:
-            cur.execute("INSERT INTO users (username, password) VALUES (%s, %s);", (username, password))
+            hashed_password = generate_password_hash(password)
+
+            cur.execute("INSERT INTO users (username, password) VALUES (%s, %s);", (username, hashed_password))
             conn.commit()
             flash("登録が完了しました")
             cur.close()
@@ -71,18 +75,21 @@ def login():
 
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute("SELECT * FROM users WHERE username = %s AND password = %s;", (username, password))
+        cur.execute("SELECT * FROM users WHERE username = %s AND password = %s;", (username,))
         user = cur.fetchone()
         cur.close()
         conn.close()
-
         if user:
-            flash(f"ようこそ、{username}さん！")
-            session['username'] = username
-            return redirect(url_for("main.account"))
+            stored_hash = user[2]
+            if check_password_hash(stored_hash, password):
+                flash(f"ようこそ、{username}さん！")
+                session["username"] = username
+                return redirect(url_for("main.account"))
+            else:
+                flash("パスワードが違います。")
         else:
-            flash("ユーザー名またはパスワードが違います。")
-
+            flash("ユーザー名が存在しません。")
+        
     return render_template("login.html")
 
 @main.route('/account')

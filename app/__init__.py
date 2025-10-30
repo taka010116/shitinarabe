@@ -37,7 +37,7 @@ def broadcast_lobby_count():
     print("count", len(waiting_players))
     print("🔹 ロビーにいるユーザー:", waiting_players)  # デバッグ用
 
-    if len(waiting_players) > 3:
+    if len(waiting_players) > 1:
         start_matching()
         print("マッチング開始")
     

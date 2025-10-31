@@ -54,18 +54,29 @@ socket.on("update_hands", hands => {
 */
 
 socket.on("update_hand", data => {
-    console.log(`${data.username} の配牌:`, data.hand);
-    
+    console.log(`${data.username} の配牌:`, data.hands);
+
     if (data.username === username) {
         const handDiv = document.getElementById("hand");
         handDiv.innerHTML = "";
+
         data.hand.forEach(card => {
             const c = document.createElement("div");
             c.className = "card";
-            c.textContent = card;
-            c.onclick = () => {
+
+            // カード画像を表示
+            const img = document.createElement("img");
+            img.src = `/static/cards/${card}.png`; // 画像ファイルパス
+            img.alt = card;
+            img.style.width = "60px";
+            img.style.height = "90px";
+            img.style.cursor = "pointer";
+
+            img.onclick = () => {
                 socket.emit("play_card", {username, room, card});
-            }
+            };
+
+            c.appendChild(img);
             handDiv.appendChild(c);
         });
     }

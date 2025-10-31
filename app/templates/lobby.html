@@ -89,6 +89,9 @@
           console.log("受信データ:", data); // ← data全体を表示
           console.log("ルームID:", data.room_id);
           console.log("参加者一覧:", data.players);
+          const roomUrl = `/game?room_id=${encodeURIComponent(data.room_id)}`;
+          window.location.href = roomUrl;
+
         });
 
         // ページを離れるときに退出を通知

@@ -168,13 +168,10 @@ def lobby():
     return render_template("lobby.html")  # ロビー画面
 
 #ここからゲーム
-@main.route("/game")
+@app.route("/game")
 def game():
-    if "username" not in session:
-        flash("ログインしてください")
-        return redirect(url_for("main.login"))
-    return render_template("game.html", username=session["username"])
-
+    room_id = request.args.get("room_id")
+    return render_template("game.html", room_id=room_id)
 
 
 # ----------------------------

@@ -13,7 +13,19 @@
 </head>
 <body>
 <h1>オンライン七並べ</h1>
-<div id="table" style="display: grid; grid-template-columns: repeat(13, 60px); grid-template-rows: repeat(4, 90px); gap: 4px; justify-content: center; margin-top: 50px;">
+<div id="table"
+     style="
+        display: grid;
+        grid-template-columns: repeat(13, 60px);
+        grid-template-rows: repeat(4, 90px);
+        gap: 2px;
+        justify-content: center;
+        margin-top: 40px;
+        background-color: #0b6623;
+        padding: 10px;
+        border-radius: 8px;
+     ">
+</div>
     <div class="suit" id="hearts"></div>
     <div class="suit" id="spades"></div>
     <div class="suit" id="diamonds"></div>
@@ -21,7 +33,19 @@
 </div>
 
 <h3>あなたの手札</h3>
-<div id="hand" style="position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px;"></div>
+<div id="hand"
+     style="
+        position: fixed;
+        bottom: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 5px;
+        background-color: rgba(255,255,255,0.2);
+        padding: 10px;
+        border-radius: 10px;
+     ">
+</div>
 <script>
 const socket = io();
 
@@ -54,27 +78,39 @@ socket.on("update_hands", hands => {
 });
 */
 function initTable() {
-    const tableDiv = document.getElementById("table");
-    tableDiv.innerHTML = "";
+    const table = document.getElementById("table");
+    table.innerHTML = "";
 
-    // 4行 × 13列 のグリッドを生成
+    // 各スート行に13列のセルを作成
     for (let row = 0; row < suits.length; row++) {
         for (let col = 1; col <= 13; col++) {
             const cell = document.createElement("div");
-            cell.className = "cell";
             cell.id = `${suits[row]}${col}_cell`;
             cell.style.width = "60px";
             cell.style.height = "90px";
-            cell.style.border = "1px solid #ccc";
+            cell.style.border = "1px solid #444";
+            cell.style.borderRadius = "6px";
+            cell.style.backgroundColor = "rgba(255,255,255,0.1)";
             cell.style.display = "flex";
             cell.style.alignItems = "center";
             cell.style.justifyContent = "center";
-            tableDiv.appendChild(cell);
+            table.appendChild(cell);
         }
     }
 }
 
 initTable();
+
+function sortCards(cards) {
+    const order = { H: 0, S: 1, D: 2, K: 3 };
+    return cards.sort((a, b) => {
+        const suitA = order[a[0]];
+        const suitB = order[b[0]];
+        if (suitA !== suitB) return suitA - suitB;
+        return parseInt(a.slice(1)) - parseInt(b.slice(1));
+    });
+}
+
 
 socket.on("update_hands", hands => {
     console.log("hands:", hands);
@@ -83,19 +119,33 @@ socket.on("update_hands", hands => {
     const myHand = hands[username];
     if (!myHand) return;
     const suitsOrder = ["H","S","D","K"];
-    const sortedHand = suitsOrder.flatMap(suit => 
-        myHand
-            .filter(c => c.startsWith(suit))
-            .sort((a,b) => parseInt(a.slice(1)) - parseInt(b.slice(1)))
-    );
+    let sortedHand = sortCards([...myHand]);
+
 
     const handDiv = document.getElementById("hand");
     handDiv.innerHTML = "";
 
+    for (const suit of suits) {
+        const seven = `${suit}7`;
+        if (sortedHand.includes(seven)) {
+            const cell = document.getElementById(`${seven}_cell`);
+            if (cell) {
+                const img = document.createElement("img");
+                img.src = `/static/cards/${seven}.png`;
+                img.alt = seven;
+                img.style.width = "60px";
+                img.style.height = "90px";
+                cell.appendChild(img);
+            }
+            // 手札から削除
+            sortedHand = sortedHand.filter(c => c !== seven);
+        }
+    }
+
     myHand.forEach(card => {
         const c = document.createElement("div");
         c.className = "card";
-
+        
         const img = document.createElement("img");
         img.src = `/static/cards/${card}.png`;
         img.alt = card;
@@ -111,24 +161,7 @@ socket.on("update_hands", hands => {
         handDiv.appendChild(c);
     });
 
-    for (const suit of suits) {
-        const seven = `${suit}7`;
-        const cell = document.getElementById(`${seven}_cell`);
-
-        // 7を手札に持っていたら、自動的に出す
-        if (myHand.includes(seven)) {
-            const img7 = document.createElement("img");
-            img7.src = `/static/cards/${seven}.png`;
-            img7.alt = seven;
-            img7.style.width = "60px";
-            img7.style.height = "90px";
-            cell.appendChild(img7);
-
-            // 手札から除外（視覚的に消す）
-            const imgInHand = Array.from(handDiv.children).find(div => div.textContent === seven);
-            if (imgInHand) handDiv.removeChild(imgInHand);
-        }
-    }
+    
 
 });
 

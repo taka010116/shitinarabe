@@ -27,8 +27,10 @@
 const socket = io();
 
 const username = "{{ username }}";
-const room = "room1";  // 簡易版: 固定ルーム
+const room = "{{ room_id }}"; // 簡易版: 固定ルーム
 
+console.log("usename : " + username);
+console.log("room_id : " + room_id);
 socket.emit("join_game", {username, room});
 
 /*

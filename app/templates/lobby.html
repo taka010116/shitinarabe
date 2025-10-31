@@ -81,9 +81,6 @@
 });
       
         // 対局開始ボタン
-        document.getElementById("startBtn").onclick = () => {
-            socket.emit("start_match");
-        };
 
         // ゲーム開始通知
         socket.on("match_found", data => {

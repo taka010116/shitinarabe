@@ -68,8 +68,12 @@ def start_matching():
 
     for p in players:
         if not p.startswith("COMPUTER"):
-            socketio.emit("match_found", {"room_id": room_id, "players": players}, to=p)
-            print("マッチングしました")
+            sid = player_sids.get(p)
+            if sid:
+                socketio.emit("match_found", {"room_id": room_id, "players": players}, to=sid)
+                print("マッチングしました")
+            else:
+                print("sidなし")
     #broadcast_lobby_count()
 # ----------------------------
 # SocketIO イベント

@@ -13,7 +13,7 @@
 </head>
 <body>
 <h1>オンライン七並べ</h1>
-<div id="table" style="display:flex; justify-content:center; margin-top:50px;">
+<div id="table" style="display: grid; grid-template-columns: repeat(13, 60px); grid-template-rows: repeat(4, 90px); gap: 4px; justify-content: center; margin-top: 50px;">
     <div class="suit" id="hearts"></div>
     <div class="suit" id="spades"></div>
     <div class="suit" id="diamonds"></div>
@@ -21,7 +21,7 @@
 </div>
 
 <h3>あなたの手札</h3>
-<div id="hand" style="position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); display:flex;"></div>
+<div id="hand" style="position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px;"></div>
 <script>
 const socket = io();
 
@@ -31,6 +31,8 @@ const room = "{{ room_id }}"; // 簡易版: 固定ルーム
 console.log("usename : " + username);
 console.log("room_id : " + room);
 socket.emit("join_game", {username, room});
+const suits = ["H", "S", "D", "K"]; // 各スートを上から順に行として使う
+const suitNames = { H: "hearts", S: "spades", D: "diamonds", K: "clubs" };
 
 /*
 socket.on("update_hands", hands => {
@@ -51,6 +53,28 @@ socket.on("update_hands", hands => {
     });
 });
 */
+function initTable() {
+    const tableDiv = document.getElementById("table");
+    tableDiv.innerHTML = "";
+
+    // 4行 × 13列 のグリッドを生成
+    for (let row = 0; row < suits.length; row++) {
+        for (let col = 1; col <= 13; col++) {
+            const cell = document.createElement("div");
+            cell.className = "cell";
+            cell.id = `${suits[row]}${col}_cell`;
+            cell.style.width = "60px";
+            cell.style.height = "90px";
+            cell.style.border = "1px solid #ccc";
+            cell.style.display = "flex";
+            cell.style.alignItems = "center";
+            cell.style.justifyContent = "center";
+            tableDiv.appendChild(cell);
+        }
+    }
+}
+
+initTable();
 
 socket.on("update_hands", hands => {
     console.log("hands:", hands);
@@ -87,24 +111,25 @@ socket.on("update_hands", hands => {
         handDiv.appendChild(c);
     });
 
-    const table = {
-        H: document.getElementById("hearts"),
-        S: document.getElementById("spades"),
-        D: document.getElementById("diamonds"),
-        K: document.getElementById("clubs")
-    };
-    for (const s of suitsOrder) {
-        table[s].innerHTML = "";
-        const sevenCard = myHand.find(c => c === `${s}7`);
-        if (sevenCard) {
+    for (const suit of suits) {
+        const seven = `${suit}7`;
+        const cell = document.getElementById(`${seven}_cell`);
+
+        // 7を手札に持っていたら、自動的に出す
+        if (myHand.includes(seven)) {
             const img7 = document.createElement("img");
-            img7.src = `/static/cards/${sevenCard}.png`;
+            img7.src = `/static/cards/${seven}.png`;
+            img7.alt = seven;
             img7.style.width = "60px";
             img7.style.height = "90px";
-            table[s].appendChild(img7);
+            cell.appendChild(img7);
+
+            // 手札から除外（視覚的に消す）
+            const imgInHand = Array.from(handDiv.children).find(div => div.textContent === seven);
+            if (imgInHand) handDiv.removeChild(imgInHand);
         }
     }
-    
+
 });
 
 

@@ -53,34 +53,36 @@ socket.on("update_hands", hands => {
 });
 */
 
-socket.on("update_hand", data => {
-    console.log(`${data.username} の配牌:`, data.hands);
+socket.on("update_hands", hands => {
+    console.log("hands:", hands);
 
-    if (data.username === username) {
-        const handDiv = document.getElementById("hand");
-        handDiv.innerHTML = "";
+    // 自分の手札だけ表示
+    const myHand = hands[username];
+    if (!myHand) return;
 
-        data.hand.forEach(card => {
-            const c = document.createElement("div");
-            c.className = "card";
+    const handDiv = document.getElementById("hand");
+    handDiv.innerHTML = "";
 
-            // カード画像を表示
-            const img = document.createElement("img");
-            img.src = `/static/cards/${card}.png`; // 画像ファイルパス
-            img.alt = card;
-            img.style.width = "60px";
-            img.style.height = "90px";
-            img.style.cursor = "pointer";
+    myHand.forEach(card => {
+        const c = document.createElement("div");
+        c.className = "card";
 
-            img.onclick = () => {
-                socket.emit("play_card", {username, room, card});
-            };
+        const img = document.createElement("img");
+        img.src = `/static/cards/${card}.png`;
+        img.alt = card;
+        img.style.width = "60px";
+        img.style.height = "90px";
+        img.style.cursor = "pointer";
 
-            c.appendChild(img);
-            handDiv.appendChild(c);
-        });
-    }
+        img.onclick = () => {
+            socket.emit("play_card", {username, room, card});
+        };
+
+        c.appendChild(img);
+        handDiv.appendChild(c);
+    });
 });
+
 
 socket.on("card_played", data => {
     // 場の更新

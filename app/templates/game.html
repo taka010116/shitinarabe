@@ -33,6 +33,9 @@ socket.emit("join_game", {username, room});
 
 socket.on("update_hands", hands => {
     const myHand = hands[username];
+
+    // 🔹 コンソールに自分の手札を表示
+    console.log("📥 受信した手札:", myHand);
     const handDiv = document.getElementById("hand");
     handDiv.innerHTML = "";
     myHand.forEach(card => {

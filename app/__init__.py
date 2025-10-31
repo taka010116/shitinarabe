@@ -135,20 +135,38 @@ def handle_disconnect():
 
     broadcast_lobby_count()
 
+game_rooms = {}
+
+def generate_deck():
+    suits = ["H", "S", "D", "K"]
+    return [f"{s}{i}" for s in suits for i in range(1, 14)] 
 
 @socketio.on("join_game")
 def handle_join(data):
     room = data["room"]
     username = data["username"]
     join_room(room)
-    if room not in rooms:
-        rooms[room] = {"players": [], "hands": {}, "table": {"hearts":[], "spades":[], "diamonds":[], "clubs":[]}}  
-    rooms[room]["players"].append(username)
-    # ランダムで手札を配布（例: 13枚ずつ）
-    deck = [f"{suit}{num}" for suit in ["H","S","D","C"] for num in range(1,14)]
-    random.shuffle(deck)
-    rooms[room]["hands"][username] = deck[:13]
-    emit("update_hands", rooms[room]["hands"], room=room)
+    if room not in game_rooms:
+        game_rooms[room] = {
+            "players": [], 
+            "hands": {}, 
+            "table": {"hearts":[], "spades":[], "diamonds":[], "clubs":[]}
+            }  
+    room_data = game_rooms[room]
+    deck = room_data["deck"]
+    players = room_data["players"]
+
+    if username not in players:
+        # ランダムに13枚配布
+        hand = random.sample(deck, 13)
+        players[username] = hand
+        # デッキから削除
+        for card in hand:
+            deck.remove(card)
+
+    # 全員に現在の手札を送信
+    socketio.emit("update_hands", players, room=room)
+
 
 @socketio.on("leave_lobby")
 def handle_leave(data):

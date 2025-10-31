@@ -172,7 +172,7 @@ def handle_join(data):
         print(f"{u} の配牌: {h}")
 
     socketio.emit("update_hands", hands, room=room)
-    print("Players : ", players)
+    print("hands : ", hands)
     # 全員に現在の手札を送信
     #socketio.emit("update_hands", players, room=room)
 

@@ -93,10 +93,6 @@
           console.log("ルームID:", data.room_id);
           console.log("参加者一覧:", data.players);
         });
-        socket.on("match_found", data => {
-          alert(`対局開始！参加者: ${data.players.join(", ")}`);
-          console.log("対局開始");
-        });
 
         // ページを離れるときに退出を通知
         window.addEventListener("beforeunload", () => {

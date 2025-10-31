@@ -31,6 +31,7 @@ const room = "room1";  // 簡易版: 固定ルーム
 
 socket.emit("join_game", {username, room});
 
+/*
 socket.on("update_hands", hands => {
     const myHand = hands[username];
 
@@ -47,6 +48,25 @@ socket.on("update_hands", hands => {
         }
         handDiv.appendChild(c);
     });
+});
+*/
+
+socket.on("update_hand", data => {
+    console.log(`${data.username} の配牌:`, data.hand);
+    
+    if (data.username === username) {
+        const handDiv = document.getElementById("hand");
+        handDiv.innerHTML = "";
+        data.hand.forEach(card => {
+            const c = document.createElement("div");
+            c.className = "card";
+            c.textContent = card;
+            c.onclick = () => {
+                socket.emit("play_card", {username, room, card});
+            }
+            handDiv.appendChild(c);
+        });
+    }
 });
 
 socket.on("card_played", data => {

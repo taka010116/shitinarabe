@@ -166,9 +166,18 @@ def handle_join(data):
         # デッキから削除
         for card in hand:
             deck.remove(card)
+
+    for u, h in players.items():
+        socketio.emit(
+            "update_hand", 
+            {"username": u, "hand": h}, 
+            room=room
+        )
+        print("playersitem:". h)
+
     print("Players : ", players)
     # 全員に現在の手札を送信
-    socketio.emit("update_hands", players, room=room)
+    #socketio.emit("update_hands", players, room=room)
 
 
 @socketio.on("leave_lobby")

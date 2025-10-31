@@ -168,7 +168,7 @@ def lobby():
     return render_template("lobby.html")  # ロビー画面
 
 #ここからゲーム
-@app.route("/game")
+@main.route("/game")
 def game():
     room_id = request.args.get("room_id")
     return render_template("game.html", room_id=room_id)

@@ -173,7 +173,7 @@ def handle_join(data):
             {"username": u, "hand": h}, 
             room=room
         )
-        print("playersitem:". h)
+        print("playersitem:", h)
 
     print("Players : ", players)
     # 全員に現在の手札を送信
@@ -214,9 +214,9 @@ def handle_play(data):
     card = data["card"]
     # ここで場のルールチェック（7からの連番）
     # 場に出せる場合だけ
-    rooms[room]["hands"][username].remove(card)
+    game_rooms[room]["hands"][username].remove(card)
     suit = card[0]
-    rooms[room]["table"][suit].append(card)
+    game_rooms[room]["table"][suit].append(card)
     emit("card_played", {"username": username, "card": card, "table": rooms[room]["table"]}, room=room)
 
 

@@ -149,14 +149,14 @@ def handle_join(data):
     if room not in game_rooms:
         game_rooms[room] = {
             "deck": generate_deck(),
-            "players": [], 
+            "players": {}, 
             "hands": {}, 
             "table": {"hearts":[], "spades":[], "diamonds":[], "clubs":[]}
             }  
     room_data = game_rooms[room]
     deck = room_data["deck"]
     print("デッキ:", deck)
-    
+
     players = room_data["players"]
 
     if username not in players:
@@ -166,7 +166,7 @@ def handle_join(data):
         # デッキから削除
         for card in hand:
             deck.remove(card)
-
+    print("Players : ", players)
     # 全員に現在の手札を送信
     socketio.emit("update_hands", players, room=room)
 

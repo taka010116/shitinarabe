@@ -13,7 +13,7 @@
 </head>
 <body>
 <h1>オンライン七並べ</h1>
-<div id="table">
+<div id="table" style="display:flex; justify-content:center; margin-top:50px;">
     <div class="suit" id="hearts"></div>
     <div class="suit" id="spades"></div>
     <div class="suit" id="diamonds"></div>
@@ -21,8 +21,7 @@
 </div>
 
 <h3>あなたの手札</h3>
-<div id="hand"></div>
-
+<div id="hand" style="position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); display:flex;"></div>
 <script>
 const socket = io();
 
@@ -59,6 +58,12 @@ socket.on("update_hands", hands => {
     // 自分の手札だけ表示
     const myHand = hands[username];
     if (!myHand) return;
+    const suitsOrder = ["H","S","D","K"];
+    const sortedHand = suitsOrder.flatMap(suit => 
+        myHand
+            .filter(c => c.startsWith(suit))
+            .sort((a,b) => parseInt(a.slice(1)) - parseInt(b.slice(1)))
+    );
 
     const handDiv = document.getElementById("hand");
     handDiv.innerHTML = "";
@@ -81,6 +86,25 @@ socket.on("update_hands", hands => {
         c.appendChild(img);
         handDiv.appendChild(c);
     });
+
+    const table = {
+        H: document.getElementById("hearts"),
+        S: document.getElementById("spades"),
+        D: document.getElementById("diamonds"),
+        K: document.getElementById("clubs")
+    };
+    for (const s of suitsOrder) {
+        table[s].innerHTML = "";
+        const sevenCard = myHand.find(c => c === `${s}7`);
+        if (sevenCard) {
+            const img7 = document.createElement("img");
+            img7.src = `/static/cards/${sevenCard}.png`;
+            img7.style.width = "60px";
+            img7.style.height = "90px";
+            table[s].appendChild(img7);
+        }
+    }
+    
 });
 
 

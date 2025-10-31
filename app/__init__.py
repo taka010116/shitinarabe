@@ -157,24 +157,21 @@ def handle_join(data):
     deck = room_data["deck"]
     print("デッキ:", deck)
 
-    players = room_data["players"]
+    hands = room_data["hands"]
 
-    if username not in players:
-        # ランダムに13枚配布
+    if username not in hands:
+        # デッキからランダムに13枚取り出す
         hand = random.sample(deck, 13)
-        players[username] = hand
+        hands[username] = hand
         # デッキから削除
         for card in hand:
             deck.remove(card)
 
-    for u, h in players.items():
-        socketio.emit(
-            "update_hand", 
-            {"username": u, "hand": h}, 
-            room=room
-        )
-        print("playersitem:", h)
+    # デバッグ用：各プレイヤーの配牌
+    for u, h in hands.items():
+        print(f"{u} の配牌: {h}")
 
+    socketio.emit("update_hands", hands, room=room)
     print("Players : ", players)
     # 全員に現在の手札を送信
     #socketio.emit("update_hands", players, room=room)

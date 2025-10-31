@@ -30,7 +30,7 @@ const username = "{{ username }}";
 const room = "{{ room_id }}"; // 簡易版: 固定ルーム
 
 console.log("usename : " + username);
-console.log("room_id : " + room_id);
+console.log("room_id : " + room);
 socket.emit("join_game", {username, room});
 
 /*

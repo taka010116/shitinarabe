@@ -171,7 +171,7 @@ def lobby():
 @main.route("/game")
 def game():
     room_id = request.args.get("room_id")
-    username = request.args.get("username") 
+    username = session.get("username")
     return render_template("game.html", room_id=room_id, username=username)
 
 # ----------------------------

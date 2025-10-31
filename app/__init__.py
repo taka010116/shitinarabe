@@ -148,12 +148,15 @@ def handle_join(data):
     join_room(room)
     if room not in game_rooms:
         game_rooms[room] = {
+            "deck": generate_deck(),
             "players": [], 
             "hands": {}, 
             "table": {"hearts":[], "spades":[], "diamonds":[], "clubs":[]}
             }  
     room_data = game_rooms[room]
     deck = room_data["deck"]
+    print("デッキ:", deck)
+    
     players = room_data["players"]
 
     if username not in players:

@@ -238,7 +238,7 @@ def handle_join(data):
         random.shuffle(deck)
 
         # 各プレイヤーに13枚ずつ配る
-        hands = [deck[i*13:(i+1)*13] for i in range(4)]
+        all_hands = [deck[i*13:(i+1)*13] for i in range(4)]
 
         # 13×4のテーブル（スート別）
         table = {
@@ -252,7 +252,9 @@ def handle_join(data):
         game_rooms[room] = {
             "players": [],
             "hands": {},
-            "table": table
+            "table": table,
+            "deck": deck,
+            "all_hands": all_hands
         }
 
         # 7を中央に配置する
@@ -268,7 +270,7 @@ def handle_join(data):
     if username not in players:
         players.append(username)
         index = len(players) - 1
-        player_hand = hands[index]
+        player_hand = room_data["all_hands"][idx]
         room_data["hands"][username] = player_hand
     else:
         player_hand = room_data["hands"][username]

@@ -142,7 +142,7 @@ cards = [f"{s}{n}" for s in suits for n in numbers]
 def generate_deck():
     suits = ["H", "S", "D", "K"]
     return [f"{s}{i}" for s in suits for i in range(1, 14)] 
-
+"""
 @socketio.on("join_game")
 def handle_join(data):
     room = data["room"]
@@ -150,6 +150,7 @@ def handle_join(data):
     join_room(room)
 
     """
+"""
     if room not in game_rooms:
         game_rooms[room] = {
             "deck": generate_deck(),
@@ -180,6 +181,7 @@ def handle_join(data):
     # 全員に現在の手札を送信
     #socketio.emit("update_hands", players, room=room)
     """
+"""
     #テーブルもサーバー側で管理する。
     if room not in game_rooms:
         random.shuffle(cards)
@@ -222,6 +224,81 @@ def handle_join(data):
     # 状態を全員に送信
     emit("update_table", {"table": game_rooms[room]["table"]}, to=room)
     emit("update_hand", {"username": username, "hand": player_hand}, room=room)
+"""
+@socketio.on("join_game")
+def handle_join(data):
+    room = data["room"]
+    username = data["username"]
+    join_room(room)
+
+    # 初期化（部屋が存在しない場合のみ）
+    if room not in game_rooms:
+        # 山札を作成・シャッフル
+        deck = generate_deck()  # 例: ["H1", "H2", ..., "S13"]
+        random.shuffle(deck)
+
+        # 各プレイヤーに13枚ずつ配る
+        hands = [deck[i*13:(i+1)*13] for i in range(4)]
+
+        # 13×4のテーブル（スート別）
+        table = {
+            "hearts": [None] * 13,
+            "spades": [None] * 13,
+            "diamonds": [None] * 13,
+            "clubs": [None] * 13
+        }
+
+        # 部屋の情報を初期化
+        game_rooms[room] = {
+            "players": [],
+            "hands": {},
+            "table": table
+        }
+
+        # 7を中央に配置する
+        for suit in ["hearts", "spades", "diamonds", "clubs"]:
+            table[suit][6] = None  # index=6 が「7」の位置（1始まり→0始まりで6）
+
+    # 既存データ取得
+    room_data = game_rooms[room]
+    players = room_data["players"]
+    table = room_data["table"]
+
+    # プレイヤー登録と手札割り当て
+    if username not in players:
+        players.append(username)
+        index = len(players) - 1
+        player_hand = hands[index]
+        room_data["hands"][username] = player_hand
+    else:
+        player_hand = room_data["hands"][username]
+
+    # 自分の手札から7を探してテーブルに置く
+    new_hand = []
+    for card in player_hand:
+        suit = card[0]  # 例: "H7" → "H"
+        num = int(card[1:])
+        suit_name = {
+            "H": "hearts",
+            "S": "spades",
+            "D": "diamonds",
+            "K": "clubs"
+        }[suit]
+
+        if num == 7:
+            table[suit_name][6] = card  # 7を中央に配置
+            print(f"{username} が {card} を中央に配置しました")
+        else:
+            new_hand.append(card)
+
+    # 手札更新
+    room_data["hands"][username] = new_hand
+
+    # 状態を全員に共有
+    emit("update_table", {"table": table}, to=room)
+    emit("update_hand", {"username": username, "hand": new_hand}, room=room)
+
+
 
 @socketio.on("leave_lobby")
 def handle_leave(data):

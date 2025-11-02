@@ -135,8 +135,10 @@ def handle_disconnect():
 
     broadcast_lobby_count()
 
-game_rooms = {}
-
+game_rooms = []
+suits = ["D", "H", "S", "K"]
+numbers = list(range(1, 14))
+cards = [f"{s}{n}" for s in suits for n in numbers]
 def generate_deck():
     suits = ["H", "S", "D", "K"]
     return [f"{s}{i}" for s in suits for i in range(1, 14)] 
@@ -146,6 +148,8 @@ def handle_join(data):
     room = data["room"]
     username = data["username"]
     join_room(room)
+
+    """
     if room not in game_rooms:
         game_rooms[room] = {
             "deck": generate_deck(),
@@ -175,7 +179,35 @@ def handle_join(data):
     print("hands : ", hands)
     # 全員に現在の手札を送信
     #socketio.emit("update_hands", players, room=room)
+    """
+    #テーブルもサーバー側で管理する。
+    if room not in game_rooms:
+        random.shuffle(cards)
+        hands = [cards[i*13:(i+1)*13] for i in range(4)]
+        table = [[None for _ in range(13)] for _ in range(4)]  # 13×4 のマス
+        game_rooms[room] = {"players": [], "hands": {}, "table": table}
 
+        for i, s in enumerate(suits):
+            table[i][6] = f"{s}7"  # 中央(7列目)に7を配置
+
+    # プレイヤー登録
+    game_rooms[room]["players"].append(username)
+    if username not in game_rooms[room]["hands"]:
+        game_rooms[room]["hands"][username] = hands[len(game_rooms[room]["players"]) - 1]
+
+    # 7を持っていた場合 → 自動でテーブルに置く
+    player_hand = game_rooms[room]["hands"][username]
+    for s in suits:
+        seven = f"{s}7"
+        if seven in player_hand:
+            player_hand.remove(seven)
+            # 7は中央列(6番目)に固定配置
+            row = suits.index(s)
+            game_rooms[room]["table"][row][6] = seven
+
+    # 状態を全員に送信
+    emit("update_table", {"table": game_rooms[room]["table"]}, to=room)
+    emit("update_hand", {"username": username, "hand": player_hand}, room=room)
 
 @socketio.on("leave_lobby")
 def handle_leave(data):

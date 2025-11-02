@@ -32,6 +32,41 @@
     <div class="suit" id="clubs"></div>
 </div>
 
+<style>
+#table {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0 auto;
+  width: fit-content;
+}
+.row {
+  display: flex;
+  gap: 4px;
+}
+.slot {
+  width: 70px;
+  height: 100px;
+  border: 1px solid #ccc;
+  background-color: #0a3;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.card {
+  width: 70px;
+  height: 100px;
+}
+#hand {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  gap: 5px;
+}
+</style>
+
+
 <h3>あなたの手札</h3>
 <div id="hand"
      style="
@@ -111,7 +146,7 @@ function sortCards(cards) {
     });
 }
 
-
+/*
 socket.on("update_hands", hands => {
     console.log("hands:", hands);
 
@@ -163,6 +198,52 @@ socket.on("update_hands", hands => {
 
     
 
+});
+*/
+
+socket.on("update_hand", data => {
+    if (data.username === username) {
+        const handDiv = document.getElementById("hand");
+        handDiv.innerHTML = "";
+        const sorted = data.hand.sort((a,b) => {
+            const n1 = parseInt(a.slice(1)), n2 = parseInt(b.slice(1));
+            const s1 = ["D","H","S","K"].indexOf(a[0]);
+            const s2 = ["D","H","S","K"].indexOf(b[0]);
+            return s1 - s2 || n1 - n2;
+        });
+
+        sorted.forEach(card => {
+            const c = document.createElement("img");
+            c.src = `/static/cards/${card}.png`;
+            c.className = "card";
+            c.onclick = () => socket.emit("play_card", { username, room, card });
+            handDiv.appendChild(c);
+        });
+    }
+});
+
+// テーブル更新
+socket.on("update_table", data => {
+    const table = data.table;
+    const tableDiv = document.getElementById("table");
+    tableDiv.innerHTML = "";
+
+    for (let i = 0; i < 4; i++) {
+        const rowDiv = document.createElement("div");
+        rowDiv.className = "row";
+        for (let j = 0; j < 13; j++) {
+            const slot = document.createElement("div");
+            slot.className = "slot";
+            if (table[i][j]) {
+                const img = document.createElement("img");
+                img.src = `/static/cards/${table[i][j]}.png`;
+                img.className = "card";
+                slot.appendChild(img);
+            }
+            rowDiv.appendChild(slot);
+        }
+        tableDiv.appendChild(rowDiv);
+    }
 });
 
 

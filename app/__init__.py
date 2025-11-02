@@ -185,8 +185,17 @@ def handle_join(data):
         random.shuffle(cards)
         hands = [cards[i*13:(i+1)*13] for i in range(4)]
         table = [[None for _ in range(13)] for _ in range(4)]  # 13×4 のマス
-        game_rooms[room] = {"players": [], "hands": {}, "table": table}
-
+        game_rooms[room] = {
+            "deck": generate_deck(),
+            "players": [], 
+            "hands": {}, 
+            "table": {
+                "hearts": [None] * 13,
+                "spades": [None] * 13,
+                "diamonds": [None] * 13,
+                "clubs": [None] * 13
+            }
+        }
         for i, s in enumerate(suits):
             table[i][6] = f"{s}7"  # 中央(7列目)に7を配置
 
@@ -196,14 +205,19 @@ def handle_join(data):
         game_rooms[room]["hands"][username] = hands[len(game_rooms[room]["players"]) - 1]
 
     # 7を持っていた場合 → 自動でテーブルに置く
-    player_hand = game_rooms[room]["hands"][username]
-    for s in suits:
-        seven = f"{s}7"
-        if seven in player_hand:
-            player_hand.remove(seven)
-            # 7は中央列(6番目)に固定配置
-            row = suits.index(s)
-            game_rooms[room]["table"][row][6] = seven
+    
+    for user, hand in list(hands.items()):
+        new_hand = []
+        for card in hand:
+            suit = card[0]
+            num = int(card[1:])
+            if num == 7:
+                # テーブルの中央（インデックス6）に置く
+                game_rooms[room]["table"][suit][6] = card
+                print(f"{user} が {card} を中央に配置しました")
+            else:
+                new_hand.append(card)
+        hands[user] = new_hand
 
     # 状態を全員に送信
     emit("update_table", {"table": game_rooms[room]["table"]}, to=room)

@@ -135,7 +135,7 @@ def handle_disconnect():
 
     broadcast_lobby_count()
 
-game_rooms = []
+game_rooms = {}
 suits = ["D", "H", "S", "K"]
 numbers = list(range(1, 14))
 cards = [f"{s}{n}" for s in suits for n in numbers]

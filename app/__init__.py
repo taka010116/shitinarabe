@@ -269,7 +269,7 @@ def handle_join(data):
     # プレイヤー登録と手札割り当て
     if username not in players:
         players.append(username)
-        index = len(players) - 1
+        idx = len(players)-1
         player_hand = room_data["all_hands"][idx]
         room_data["hands"][username] = player_hand
     else:

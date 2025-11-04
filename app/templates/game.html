@@ -34,15 +34,10 @@
 
 <style>
 #table {
-  display: grid;
-  grid-template-columns: repeat(13, 80px); /* 横13列 */
-  grid-template-rows: repeat(4, 120px);    /* 縦4行 */
-  gap: 6px;
-  justify-content: center;
-  margin: 24px auto;
-  background: #0b6623;
-  padding: 12px;
-  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0 auto;
   width: fit-content;
 }
 .row {
@@ -50,28 +45,19 @@
   gap: 4px;
 }
 .slot {
-  width: 80px;
-  height: 120px;
-  background-color: rgba(255,255,255,0.03);
-  border-radius: 6px;
-  border: 1px solid rgba(0,0,0,0.4);
+  width: 70px;
+  height: 100px;
+  border: 1px solid #ccc;
+  background-color: #0a3;
+  border-radius: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden; /* 画像がはみ出さないようにする */
 }
-
 .card {
   width: 70px;
   height: 100px;
 }
-.slot img.card {
-  width: 100%;
-  height: 100%;
-  object-fit: contain; /* 画像の縦横比を保って収める */
-  pointer-events: none; /* 画像上でクリックが二重にならないように */
-}
-
 #hand {
   display: flex;
   justify-content: center;
@@ -237,77 +223,25 @@ socket.on("update_hand", data => {
 });
 
 // テーブル更新
-// suits 行の順番（上→下）
+socket.on("update_table", (data) => {
+  const table = data.table;
 
-/**
- * table データから描画用の 2D 配列 (4 x 13) を返す。
- * サーバーが {hearts:[], ...} 別形式 [[...],[...]] のどちらでも扱えるようにする。
- */
-function normalizeTableData(tableData) {
-  if (!tableData) return Array.from({length:4}, () => Array(13).fill(null));
+  const suits = ["hearts", "spades", "diamonds", "clubs"];
 
-  // 既に 2次元配列（行ごとの配列）で渡されている場合
-  if (Array.isArray(tableData) && Array.isArray(tableData[0])) {
-    // ensure size 4x13
-    const out = [];
-    for (let i = 0; i < 4; i++) {
-      out[i] = (tableData[i] && tableData[i].slice(0,13)) || Array(13).fill(null);
-      // pad if short
-      while (out[i].length < 13) out[i].push(null);
-    }
-    return out;
-  }
-
-  // 辞書形式の場合: {hearts: [...], spades: [...], ...}
-  const out = [];
   for (let i = 0; i < suits.length; i++) {
-    const s = suits[i];
-    const row = (tableData[s] && tableData[s].slice(0,13)) || Array(13).fill(null);
-    while (row.length < 13) row.push(null);
-    out.push(row);
-  }
-  return out;
-}
-
-// テーブル更新イベント
-socket.on("update_table", data => {
-  console.log("📥 update_table 受信:", data);
-  // data が {table: ...} の場合と、直接 table を送っている場合に対応
-  const tableRaw = data.table || data;
-  const table = normalizeTableData(tableRaw);
-
-  const tableDiv = document.getElementById("table");
-  // 既に grid であることを前提に、DOM を完全に入れ替える（確実）
-  tableDiv.innerHTML = "";
-
-  // 13×4 を grid の順番で埋める（row major）
-  for (let i = 0; i < 4; i++) {
+    const suit = suits[i];
     for (let j = 0; j < 13; j++) {
-      const slot = document.createElement("div");
-      slot.className = "slot";
-      slot.id = `slot-${i}-${j}`; // デバッグしやすい id
-
-      const cardName = table[i][j];
-      if (cardName && typeof cardName === "string" && cardName.trim() !== "") {
-        // 例: "H7" を想定。画像パスは cardName と同名の png
-        const img = document.createElement("img");
-        img.className = "card";
-        img.src = `/static/cards/${cardName}.png`;
-        img.alt = cardName;
-
-        // 画像が読み込めなかったらエラーで空白にする
-        img.onerror = () => {
-          console.warn("カード画像の読み込み失敗:", img.src);
-          slot.innerHTML = ""; // 失敗したら何も表示しない
-        };
-
-        slot.appendChild(img);
+      const card = table[suit][j]; // ✅ ここが正しい
+      const cell = document.getElementById(`cell-${i}-${j}`);
+      if (card) {
+        cell.innerHTML = `<img src="/static/cards/${card}.png" width="60">`;
+      } else {
+        cell.innerHTML = "";
       }
-
-      tableDiv.appendChild(slot);
     }
   }
 });
+
 
 socket.on("announce_turn", data => {
     alert(`${data.player} のターンです！`);

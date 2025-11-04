@@ -33,33 +33,40 @@
 </div>
 
 <style>
-#table {
-  display: flex;
-  flex-direction: column; /* 行を縦に並べる */
-  gap: 4px;
-  justify-content: center;
-  margin: 20px auto;
-  width: fit-content;
-}
-.row {
-  display: flex; /* 各行で4列並べる */
-  gap: 4px;
-}
-.slot {
-  width: 70px;
-  height: 100px;
-  border: 1px solid #ccc;
-  background-color: #0a3;
-  border-radius: 5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+  #table {
+    display: flex;
+    flex-direction: column; /* 行方向に並べる */
+    align-items: center;
+    gap: 6px;
+    background-color: darkgreen; /* テーブル背景 */
+    padding: 15px;
+    border-radius: 10px;
+    width: fit-content;
+    margin: auto;
+  }
+
+  .row {
+    display: flex;
+    flex-direction: row; /* 各行の中は横並び */
+    justify-content: center;
+    gap: 6px;
+  }
+  
 .card {
   width: 70px;
   height: 100px;
   object-fit: contain;
 }
+.slot {
+    width: 80px;
+    height: 120px;
+    background-color: #064b09;
+    border: 2px solid #111;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
 .card.blank {
   opacity: 0.2; /* 空白用の薄い透明 */
@@ -70,6 +77,11 @@
   margin-top: 20px;
   gap: 5px;
 }
+.slot img.card {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
 </style>
 
 

@@ -275,19 +275,16 @@ def handle_join(data):
     else:
         player_hand = room_data["hands"][username]
 
+    suit_map = {"H": "hearts", "S": "spades", "D": "diamonds", "K": "clubs"}
+
     # 自分の手札から7を探してテーブルに置く
     new_hand = []
     for card in player_hand:
         suit = card[0]  # 例: "H7" → "H"
         num = int(card[1:])
-        suit_name = {
-            "H": "hearts",
-            "S": "spades",
-            "D": "diamonds",
-            "K": "clubs"
-        }[suit]
 
         if num == 7:
+            suit_name = suit_map[suit]
             table[suit_name][6] = card  # 7を中央に配置
             print(f"{username} が {card} を中央に配置しました")
         else:

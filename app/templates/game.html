@@ -93,25 +93,6 @@ socket.emit("join_game", {username, room});
 const suits = ["H", "S", "D", "K"]; // 各スートを上から順に行として使う
 const suitNames = { H: "hearts", S: "spades", D: "diamonds", K: "clubs" };
 
-/*
-socket.on("update_hands", hands => {
-    const myHand = hands[username];
-
-    // 🔹 コンソールに自分の手札を表示
-    console.log("📥 受信した手札:", myHand);
-    const handDiv = document.getElementById("hand");
-    handDiv.innerHTML = "";
-    myHand.forEach(card => {
-        const c = document.createElement("div");
-        c.className = "card";
-        c.textContent = card;
-        c.onclick = () => {
-            socket.emit("play_card", {username, room, card});
-        }
-        handDiv.appendChild(c);
-    });
-});
-*/
 function initTable() {
     const table = document.getElementById("table");
     table.innerHTML = "";
@@ -146,61 +127,6 @@ function sortCards(cards) {
     });
 }
 
-/*
-socket.on("update_hands", hands => {
-    console.log("hands:", hands);
-
-    // 自分の手札だけ表示
-    const myHand = hands[username];
-    if (!myHand) return;
-    const suitsOrder = ["H","S","D","K"];
-    let sortedHand = sortCards([...myHand]);
-
-
-    const handDiv = document.getElementById("hand");
-    handDiv.innerHTML = "";
-
-    for (const suit of suits) {
-        const seven = `${suit}7`;
-        if (sortedHand.includes(seven)) {
-            const cell = document.getElementById(`${seven}_cell`);
-            if (cell) {
-                const img = document.createElement("img");
-                img.src = `/static/cards/${seven}.png`;
-                img.alt = seven;
-                img.style.width = "60px";
-                img.style.height = "90px";
-                cell.appendChild(img);
-            }
-            // 手札から削除
-            sortedHand = sortedHand.filter(c => c !== seven);
-        }
-    }
-
-    myHand.forEach(card => {
-        const c = document.createElement("div");
-        c.className = "card";
-        
-        const img = document.createElement("img");
-        img.src = `/static/cards/${card}.png`;
-        img.alt = card;
-        img.style.width = "60px";
-        img.style.height = "90px";
-        img.style.cursor = "pointer";
-
-        img.onclick = () => {
-            socket.emit("play_card", {username, room, card});
-        };
-
-        c.appendChild(img);
-        handDiv.appendChild(c);
-    });
-
-    
-
-});
-*/
-
 socket.on("update_hand", data => {
     if (data.username === username) {
         const handDiv = document.getElementById("hand");
@@ -223,23 +149,45 @@ socket.on("update_hand", data => {
 });
 
 // テーブル更新
-socket.on("update_table", (data) => {
+socket.on("update_table", data => {
+  console.log("📥 update_table:", data);
   const table = data.table;
+  if (!table) return;
 
-  const suits = ["hearts", "spades", "diamonds", "clubs"];
+  const tableDiv = document.getElementById("table");
+  tableDiv.innerHTML = ""; // 一度リセット
 
-  for (let i = 0; i < suits.length; i++) {
-    const suit = suits[i];
+  // 各スートごとに1行を作成（上から順に4行）
+  suits.forEach(suit => {
+    const rowDiv = document.createElement("div");
+    rowDiv.className = "row";
+
+    const row = table[suit]; // 例: [None, None, ..., "H7", ...]
+
     for (let j = 0; j < 13; j++) {
-      const card = table[suit][j]; // ✅ ここが正しい
-      const cell = document.getElementById(`cell-${i}-${j}`);
-      if (card) {
-        cell.innerHTML = `<img src="/static/cards/${card}.png" width="60">`;
-      } else {
-        cell.innerHTML = "";
+      const slot = document.createElement("div");
+      slot.className = "slot";
+
+      const card = row[j];
+      if (card && typeof card === "string") {
+        const img = document.createElement("img");
+        img.className = "card";
+        img.src = `/static/cards/${card}.png`;
+        img.alt = card;
+
+        // 読み込みエラー対応
+        img.onerror = () => {
+          console.warn(`❌ カード画像が見つかりません: ${img.src}`);
+        };
+
+        slot.appendChild(img);
       }
+
+      rowDiv.appendChild(slot);
     }
-  }
+
+    tableDiv.appendChild(rowDiv);
+  });
 });
 
 

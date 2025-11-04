@@ -149,20 +149,30 @@ socket.on("update_hand", data => {
 });
 
 // テーブル更新
+// --- テーブル更新イベント ---
 socket.on("update_table", data => {
   console.log("📥 update_table:", data);
+
   const table = data.table;
-  if (!table) return;
+  if (!table) {
+    console.warn("⚠️ table が undefined です:", data);
+    return;
+  }
 
+  const suits = ["hearts", "spades", "diamonds", "clubs"];
   const tableDiv = document.getElementById("table");
-  tableDiv.innerHTML = ""; // 一度リセット
+  tableDiv.innerHTML = "";
 
-  // 各スートごとに1行を作成（上から順に4行）
   suits.forEach(suit => {
+    const row = table[suit];
+
+    if (!Array.isArray(row)) {
+      console.warn(`⚠️ table["${suit}"] が不正です:`, row);
+      return;
+    }
+
     const rowDiv = document.createElement("div");
     rowDiv.className = "row";
-
-    const row = table[suit]; // 例: [None, None, ..., "H7", ...]
 
     for (let j = 0; j < 13; j++) {
       const slot = document.createElement("div");
@@ -174,12 +184,6 @@ socket.on("update_table", data => {
         img.className = "card";
         img.src = `/static/cards/${card}.png`;
         img.alt = card;
-
-        // 読み込みエラー対応
-        img.onerror = () => {
-          console.warn(`❌ カード画像が見つかりません: ${img.src}`);
-        };
-
         slot.appendChild(img);
       }
 

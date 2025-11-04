@@ -179,14 +179,17 @@ socket.on("update_table", data => {
       slot.className = "slot";
 
       const card = row[j];
+      const img = document.createElement("img");
+      img.className = "card";
+      img.alt = card;
       if (card && typeof card === "string") {
-        const img = document.createElement("img");
-        img.className = "card";
         img.src = `/static/cards/${card}.png`;
-        img.alt = card;
-        slot.appendChild(img);
+      }else {
+        //Bllank
+        
+        img.src = "/static/cards/Blank.png";
       }
-
+      slot.appendChild(img);
       rowDiv.appendChild(slot);
     }
 

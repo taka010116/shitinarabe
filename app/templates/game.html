@@ -228,23 +228,31 @@ socket.on("update_table", data => {
     const tableDiv = document.getElementById("table");
     tableDiv.innerHTML = "";
 
-    for (let i = 0; i < 4; i++) {
+    const suits = ["hearts", "spades", "diamonds", "clubs"];
+
+    for (let i = 0; i < suits.length; i++) {
+        const suit = suits[i];
         const rowDiv = document.createElement("div");
         rowDiv.className = "row";
+
         for (let j = 0; j < 13; j++) {
             const slot = document.createElement("div");
             slot.className = "slot";
-            if (table[i][j]) {
+
+            if (table[suit][j]) {
                 const img = document.createElement("img");
-                img.src = `/static/cards/${table[i][j]}.png`;
+                img.src = `/static/cards/${table[suit][j]}.png`;
                 img.className = "card";
                 slot.appendChild(img);
             }
+
             rowDiv.appendChild(slot);
         }
+
         tableDiv.appendChild(rowDiv);
     }
 });
+
 
 
 socket.on("card_played", data => {

@@ -169,6 +169,7 @@ socket.on("update_hand", data => {
 
 // テーブル更新
 // --- テーブル更新イベント ---
+/*
 socket.on("update_table", data => {
   console.log("📥 update_table:", data);
 
@@ -203,6 +204,66 @@ socket.on("update_table", data => {
     });
 
     tableDiv.appendChild(rowDiv);
+  }
+});
+*/
+
+// テーブル更新イベント（この関数で #table を完全に置き換え）
+socket.on("update_table", data => {
+  console.log("📥 update_table:", data);
+
+  const table = data.table;
+  if (!table) {
+    console.warn("⚠️ table が undefined です:", data);
+    retur;
+  }
+
+  //const suits = ["hearts", "spades", "diamonds", "clubs"];
+  const tableDiv = document.getElementById("table");
+
+  // 先に完全にリセット（古い要素が残らないように）
+  tableDiv.innerHTML = "";
+
+  // grid を先に作っておく（13行×4列 全セルを作成）
+  // 重要：順番通りに append すれば grid のセルに左→右、上→下で配置される
+  for (let row = 0; row < 13; row++) {
+    for (let col = 0; col < 4; col++) {
+      const slot = document.createElement("div");
+      slot.className = "slot";
+      // 空の枠だけ作成。あとでカードがあれば img を追加する
+      tableDiv.appendChild(slot);
+    }
+  }
+
+  // ここから、サーバー table データに従って各セルへ画像を挿入
+  // grid の index は row * 4 + col
+  for (let row = 0; row < 13; row++) {
+    for (let col = 0; col < 4; col++) {
+      const suit = suits[col]; // col 0->hearts,1->spades,2->diamonds,3->clubs
+      const card = (table[suit] && table[suit][row]) ? table[suit][row] : null;
+      const cellIndex = row * 4 + col;
+      const slot = tableDiv.children[cellIndex]; // 既に作成済みの slot
+
+      // slot が存在するか安全チェック
+      if (!slot) continue;
+
+      // 既に img があれば削除（古い画像があれば）
+      const existingImg = slot.querySelector("img");
+      if (existingImg) existingImg.remove();
+
+      if (card && typeof card === "string") {
+        const img = document.createElement("img");
+        img.className = "card";
+        img.alt = card;
+        img.src = `/static/cards/${card}.png`;
+        img.onerror = () => {
+          console.warn("カード画像読み込み失敗:", img.src);
+          img.remove();
+        };
+        slot.appendChild(img);
+      }
+      // card が null の場合は何もしない（枠はそのまま空白）
+    }
   }
 });
 

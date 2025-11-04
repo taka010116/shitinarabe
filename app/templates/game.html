@@ -209,63 +209,61 @@ socket.on("update_table", data => {
 */
 
 // テーブル更新イベント（この関数で #table を完全に置き換え）
+// --- テーブル更新イベント ---
 socket.on("update_table", data => {
   console.log("📥 update_table:", data);
 
   const table = data.table;
   if (!table) {
-    console.warn("⚠️ table が undefined です:", data);
-    retur;
+    console.warn("⚠️ table が undefined:", data);
+    return;
   }
 
-  //const suits = ["hearts", "spades", "diamonds", "clubs"];
+  const suits = ["hearts", "spades", "diamonds", "clubs"];
   const tableDiv = document.getElementById("table");
-
-  // 先に完全にリセット（古い要素が残らないように）
   tableDiv.innerHTML = "";
 
-  // grid を先に作っておく（13行×4列 全セルを作成）
-  // 重要：順番通りに append すれば grid のセルに左→右、上→下で配置される
+  // グリッド全体（13行 × 4列 = 52マス）をあらかじめ生成
   for (let row = 0; row < 13; row++) {
     for (let col = 0; col < 4; col++) {
       const slot = document.createElement("div");
       slot.className = "slot";
-      // 空の枠だけ作成。あとでカードがあれば img を追加する
       tableDiv.appendChild(slot);
     }
   }
 
-  // ここから、サーバー table データに従って各セルへ画像を挿入
-  // grid の index は row * 4 + col
-  for (let row = 0; row < 13; row++) {
-    for (let col = 0; col < 4; col++) {
-      const suit = suits[col]; // col 0->hearts,1->spades,2->diamonds,3->clubs
-      const card = (table[suit] && table[suit][row]) ? table[suit][row] : null;
-      const cellIndex = row * 4 + col;
-      const slot = tableDiv.children[cellIndex]; // 既に作成済みの slot
+  // 枠の中にカードを描画
+  for (let suitIndex = 0; suitIndex < suits.length; suitIndex++) {
+    const suit = suits[suitIndex];
+    const cards = table[suit];
 
-      // slot が存在するか安全チェック
-      if (!slot) continue;
+    if (!Array.isArray(cards)) {
+      console.warn(`⚠️ ${suit} が配列ではありません:`, cards);
+      continue;
+    }
 
-      // 既に img があれば削除（古い画像があれば）
-      const existingImg = slot.querySelector("img");
-      if (existingImg) existingImg.remove();
-
+    for (let i = 0; i < 13; i++) {
+      const card = cards[i];
       if (card && typeof card === "string") {
+        // index計算（row * 4 + col）
+        const cellIndex = i * 4 + suitIndex;
+        const slot = tableDiv.children[cellIndex];
+        if (!slot) continue;
+
+        // 画像生成
         const img = document.createElement("img");
         img.className = "card";
         img.alt = card;
         img.src = `/static/cards/${card}.png`;
         img.onerror = () => {
-          console.warn("カード画像読み込み失敗:", img.src);
-          img.remove();
+          console.warn("⚠️ カード画像の読み込みに失敗:", img.src);
         };
         slot.appendChild(img);
       }
-      // card が null の場合は何もしない（枠はそのまま空白）
     }
   }
 });
+
 
 
 socket.on("announce_turn", data => {

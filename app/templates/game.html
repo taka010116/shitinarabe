@@ -34,15 +34,16 @@
 
 <style>
   #table {
-    display: flex;
-    flex-direction: column; /* 行方向に並べる */
-    align-items: center;
-    gap: 6px;
-    background-color: darkgreen; /* テーブル背景 */
-    padding: 15px;
+    display: grid;
+    grid-template-columns: repeat(13, 80px); /* 横13列 */
+    grid-template-rows: repeat(4, 120px);    /* 縦4行 */
+    gap: 8px;
+    background-color: darkgreen;
+    padding: 20px;
     border-radius: 10px;
     width: fit-content;
     margin: auto;
+    justify-content: center;
   }
 
   .row {
@@ -51,7 +52,7 @@
     justify-content: center;
     gap: 6px;
   }
-  
+
 .card {
   width: 70px;
   height: 100px;

@@ -42,6 +42,7 @@
 }
 .row {
   display: flex;
+  flex-direction: row;
   gap: 4px;
 }
 .slot {
@@ -57,6 +58,12 @@
 .card {
   width: 70px;
   height: 100px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.card.blank {
+  opacity: 0.2; /* 空白用の薄い透明 */
 }
 #hand {
   display: flex;
@@ -171,6 +178,7 @@ socket.on("update_table", data => {
       return;
     }
 
+    // 1スート分の行
     const rowDiv = document.createElement("div");
     rowDiv.className = "row";
 
@@ -179,23 +187,28 @@ socket.on("update_table", data => {
       slot.className = "slot";
 
       const card = row[j];
-      const img = document.createElement("img");
-      img.className = "card";
-      img.alt = card;
       if (card && typeof card === "string") {
+        const img = document.createElement("img");
         img.src = `/static/cards/${card}.png`;
-      }else {
-        //Bllank
-        
+        img.className = "card";
+        img.alt = card;
+        slot.appendChild(img);
+      } else {
+        // 空白スロット用の透明画像 or blank画像
+        const img = document.createElement("img");
         img.src = "/static/cards/Blank.png";
+        img.className = "card blank";
+        img.alt = "empty";
+        slot.appendChild(img);
       }
-      slot.appendChild(img);
+
       rowDiv.appendChild(slot);
     }
 
     tableDiv.appendChild(rowDiv);
   });
 });
+
 
 
 socket.on("announce_turn", data => {

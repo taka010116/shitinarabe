@@ -243,6 +243,10 @@ socket.on("update_table", (data) => {
 });
 
 
+socket.on("announce_turn", data => {
+    alert(`${data.player} のターンです！`);
+});
+
 
 socket.on("card_played", data => {
     // 場の更新

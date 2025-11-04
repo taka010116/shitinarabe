@@ -254,12 +254,24 @@ def handle_join(data):
             "hands": {},
             "table": table,
             "deck": deck,
-            "all_hands": all_hands
+            "all_hands": all_hands,
+            "turn_order": [],
+            "current_turn": None
         }
 
+        cpu_names = ["COM1", "COM2"]
+        game_rooms[room]["players"].extend(cpu_names)
+
+        for i, cpu in enumerate(cpu_names):
+            hand = all_hands[i]
+            game_rooms[room]["hands"][cpu] = hand
+
+        print(f"CPUプレイヤー: {cpu_names} を追加しました")
+
         # 7を中央に配置する
-        for suit in ["hearts", "spades", "diamonds", "clubs"]:
-            table[suit][6] = None  # index=6 が「7」の位置（1始まり→0始まりで6）
+        #for suit in ["hearts", "spades", "diamonds", "clubs"]:
+        #    table[suit][6] = None  # index=6 が「7」の位置（1始まり→0始まりで6）
+
 
     # 既存データ取得
     room_data = game_rooms[room]
@@ -290,9 +302,31 @@ def handle_join(data):
         else:
             new_hand.append(card)
 
+    # --- CPU側も7を配置 ---
+    for cpu_name in ["COM1", "COM2"]:
+        cpu_hand = room_data["hands"][cpu_name]
+        new_cpu_hand = []
+        for card in cpu_hand:
+            suit = card[0]
+            num = int(card[1:])
+            if num == 7:
+                suit_name = suit_map[suit]
+                table[suit_name][6] = card
+                print(f"{cpu_name} が {card} を中央に配置しました")
+            else:
+                new_cpu_hand.append(card)
+        room_data["hands"][cpu_name] = new_cpu_hand
+    
     # 手札更新
     room_data["hands"][username] = new_hand
 
+    if room_data["current_turn"] is None:
+        room_data["turn_order"] = random.sample(room_data["players"], len(room_data["players"]))
+        room_data["current_turn"] = room_data["turn_order"][0]
+        emit("announce_turn", {"player": room_data["current_turn"]}, to=room)
+        print(f"先行プレイヤー: {room_data['current_turn']}")
+
+        
     # 状態を全員に共有
     emit("update_table", {"table": table}, to=room)
     emit("update_hand", {"username": username, "hand": new_hand}, room=room)

@@ -223,34 +223,23 @@ socket.on("update_hand", data => {
 });
 
 // テーブル更新
-socket.on("update_table", data => {
-    const table = data.table;
-    const tableDiv = document.getElementById("table");
-    tableDiv.innerHTML = "";
+socket.on("update_table", (data) => {
+  const table = data.table;
 
-    const suits = ["hearts", "spades", "diamonds", "clubs"];
+  const suits = ["hearts", "spades", "diamonds", "clubs"];
 
-    for (let i = 0; i < suits.length; i++) {
-        const suit = suits[i];
-        const rowDiv = document.createElement("div");
-        rowDiv.className = "row";
-
-        for (let j = 0; j < 13; j++) {
-            const slot = document.createElement("div");
-            slot.className = "slot";
-
-            if (table[suit][j]) {
-                const img = document.createElement("img");
-                img.src = `/static/cards/${table[suit][j]}.png`;
-                img.className = "card";
-                slot.appendChild(img);
-            }
-
-            rowDiv.appendChild(slot);
-        }
-
-        tableDiv.appendChild(rowDiv);
+  for (let i = 0; i < suits.length; i++) {
+    const suit = suits[i];
+    for (let j = 0; j < 13; j++) {
+      const card = table[suit][j]; // ✅ ここが正しい
+      const cell = document.getElementById(`cell-${i}-${j}`);
+      if (card) {
+        cell.innerHTML = `<img src="/static/cards/${card}.png" width="60">`;
+      } else {
+        cell.innerHTML = "";
+      }
     }
+  }
 });
 
 

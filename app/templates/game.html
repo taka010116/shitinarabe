@@ -34,19 +34,15 @@
 
 <style>
 #table {
-  display: grid;
-  grid-template-rows: repeat(4, 100px); /* 4行 */
-  grid-template-columns: repeat(13, 70px); /* 13列 */
+  display: flex;
+  flex-direction: column; /* 行を縦に並べる */
   gap: 4px;
   justify-content: center;
-  margin: 0 auto;
-  background-color: #040; /* 背景 */
-  padding: 8px;
-  border-radius: 8px;
+  margin: 20px auto;
+  width: fit-content;
 }
 .row {
-  display: flex;
-  flex-direction: row;
+  display: flex; /* 各行で4列並べる */
   gap: 4px;
 }
 .slot {
@@ -63,7 +59,6 @@
   width: 70px;
   height: 100px;
   object-fit: contain;
-  border-radius: 4px;
 }
 
 .card.blank {
@@ -172,39 +167,30 @@ socket.on("update_table", data => {
 
   const suits = ["hearts", "spades", "diamonds", "clubs"];
   const tableDiv = document.getElementById("table");
-  tableDiv.innerHTML = ""; // テーブル全消去
+  tableDiv.innerHTML = "";
 
-  // 各スートごとに1行を作る（4行）
-  suits.forEach(suit => {
-    const row = table[suit];
-
-    if (!Array.isArray(row)) {
-      console.warn(`⚠️ table["${suit}"] が不正です:`, row);
-      return;
-    }
-
+  // カード位置を13行×4列で描画
+  for (let i = 0; i < 13; i++) {
     const rowDiv = document.createElement("div");
     rowDiv.className = "row";
 
-    // 13列を生成
-    for (let j = 0; j < 13; j++) {
+    suits.forEach(suit => {
       const slot = document.createElement("div");
       slot.className = "slot";
 
-      const card = row[j];
+      const card = table[suit][i];
       if (card && typeof card === "string") {
         const img = document.createElement("img");
         img.src = `/static/cards/${card}.png`;
         img.className = "card";
-        img.alt = card;
         slot.appendChild(img);
       }
-      // None の場合は空の枠だけ表示（画像なし）
+
       rowDiv.appendChild(slot);
-    }
+    });
 
     tableDiv.appendChild(rowDiv);
-  });
+  }
 });
 
 

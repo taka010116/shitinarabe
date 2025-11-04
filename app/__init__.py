@@ -326,7 +326,7 @@ def handle_join(data):
         emit("announce_turn", {"player": room_data["current_turn"]}, to=room)
         print(f"先行プレイヤー: {room_data['current_turn']}")
 
-        
+    print("テーブル : ", table)
     # 状態を全員に共有
     emit("update_table", {"table": table}, to=room)
     emit("update_hand", {"username": username, "hand": new_hand}, room=room)

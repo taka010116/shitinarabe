@@ -35,19 +35,20 @@
 <style>
 #table {
   display: grid;
-  grid-template-columns: repeat(13, 70px);  /* 13列 */
-  grid-template-rows: repeat(4, 100px);     /* 4行 */
+  grid-template-columns: repeat(13, 60px);  /* 13列 */
+  grid-template-rows: repeat(4, 90px);     /* 4行 */
   gap: 4px;
   justify-content: center;
-  margin-top: 40px;
+  margin-top: 40px auto 20px;
   background-color: #0b6623;
-  padding: 15px;
+  padding: 12px;
   border-radius: 10px;
+  width: fit-content;
 }
 
 .slot {
-  width: 70px;
-  height: 100px;
+  width: 60px;
+  height: 90px;
   background-color: #0a3;
   border: 1px solid #083;
   border-radius: 6px;
@@ -256,7 +257,6 @@ socket.on("update_table", data => {
     }
   }
 });
-
 
 
 socket.on("announce_turn", data => {

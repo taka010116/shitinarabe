@@ -64,6 +64,18 @@
   pointer-events: none;  /* ← ドラッグ防止 */
 }
 
+.hand-card {
+  width: 60px;
+  height: 90px;
+  object-fit: contain;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.hand-card:hover {
+  transform: translateY(-6px);
+}
+
 </style>
 
 
@@ -233,7 +245,7 @@ socket.on("update_table", data => {
 
         // 画像生成
         const img = document.createElement("img");
-        img.className = "card";
+        img.className = "hand-card";
         img.alt = card;
         img.src = `/static/cards/${card}.png`;
         img.onerror = () => {

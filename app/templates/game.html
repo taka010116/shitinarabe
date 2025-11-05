@@ -33,56 +33,37 @@
 </div>
 
 <style>
-  #table {
-    display: grid;
-    grid-template-columns: repeat(13, 80px); /* 横13列 */
-    grid-template-rows: repeat(4, 120px);    /* 縦4行 */
-    gap: 8px;
-    background-color: darkgreen;
-    padding: 20px;
-    border-radius: 10px;
-    width: fit-content;
-    margin: auto;
-    justify-content: center;
-  }
+#table {
+  display: grid;
+  grid-template-columns: repeat(13, 70px);  /* 13列 */
+  grid-template-rows: repeat(4, 100px);     /* 4行 */
+  gap: 4px;
+  justify-content: center;
+  margin-top: 40px;
+  background-color: #0b6623;
+  padding: 15px;
+  border-radius: 10px;
+}
 
-  .row {
-    display: flex;
-    flex-direction: row; /* 各行の中は横並び */
-    justify-content: center;
-    gap: 6px;
-  }
-
-.card {
+.slot {
   width: 70px;
   height: 100px;
-  object-fit: contain;
-}
-.slot {
-    width: 80px;
-    height: 120px;
-    background-color: #064b09;
-    border: 2px solid #111;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+  background-color: #0a3;
+  border: 1px solid #083;
+  border-radius: 6px;
 
-.card.blank {
-  opacity: 0.2; /* 空白用の薄い透明 */
-}
-#hand {
   display: flex;
+  align-items: center;
   justify-content: center;
-  margin-top: 20px;
-  gap: 5px;
 }
-.slot img.card {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
+
+.card {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;   /* ← カードが綺麗に収まる */
+  pointer-events: none;  /* ← ドラッグ防止 */
+}
+
 </style>
 
 

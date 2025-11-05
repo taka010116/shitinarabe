@@ -153,7 +153,7 @@ socket.on("update_hand", data => {
         sorted.forEach(card => {
             const c = document.createElement("img");
             c.src = `/static/cards/${card}.png`;
-            c.className = "card";
+            c.className = "hand-card";
             c.onclick = () => socket.emit("play_card", { username, room, card });
             handDiv.appendChild(c);
         });
@@ -245,7 +245,7 @@ socket.on("update_table", data => {
 
         // 画像生成
         const img = document.createElement("img");
-        img.className = "hand-card";
+        img.className = "card";
         img.alt = card;
         img.src = `/static/cards/${card}.png`;
         img.onerror = () => {

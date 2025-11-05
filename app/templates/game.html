@@ -37,13 +37,14 @@
   display: grid;
   grid-template-columns: repeat(13, 60px);  /* 13列 */
   grid-template-rows: repeat(4, 90px);     /* 4行 */
-  gap: 4px;
+  gap: 6px;
   justify-content: center;
   margin-top: 40px auto 20px;
   background-color: #0b6623;
   padding: 12px;
   border-radius: 10px;
   width: fit-content;
+  box-sizing: border-box;
 }
 
 .slot {
@@ -208,55 +209,41 @@ socket.on("update_table", data => {
   console.log("📥 update_table:", data);
 
   const table = data.table;
-  if (!table) {
-    console.warn("⚠️ table が undefined:", data);
-    return;
-  }
+  if (!table) return;
 
-  const suits = ["hearts", "spades", "diamonds", "clubs"];
+  const suits = ["hearts", "spades", "diamonds", "clubs"]; // ← 行方向に並ぶ
   const tableDiv = document.getElementById("table");
   tableDiv.innerHTML = "";
 
-  // グリッド全体（13行 × 4列 = 52マス）をあらかじめ生成
-  for (let row = 0; row < 13; row++) {
-    for (let col = 0; col < 4; col++) {
+  // ✅ 正しい盤面：4行（スート） × 13列（数字）
+  for (let row = 0; row < 4; row++) {
+    for (let col = 0; col < 13; col++) {
       const slot = document.createElement("div");
       slot.className = "slot";
+      slot.id = `cell-r${row}-c${col}`; // ← 後から差し込みやすくする
       tableDiv.appendChild(slot);
     }
   }
 
-  // 枠の中にカードを描画
-  for (let suitIndex = 0; suitIndex < suits.length; suitIndex++) {
-    const suit = suits[suitIndex];
+  // ✅ table の内容をそのまま対応セルへ差し込む
+  suits.forEach((suit, rowIndex) => {
     const cards = table[suit];
+    if (!Array.isArray(cards)) return;
 
-    if (!Array.isArray(cards)) {
-      console.warn(`⚠️ ${suit} が配列ではありません:`, cards);
-      continue;
-    }
+    cards.forEach((card, colIndex) => {
+      if (!card) return;
+      const slot = document.getElementById(`cell-r${rowIndex}-c${colIndex}`);
+      if (!slot) return;
 
-    for (let i = 0; i < 13; i++) {
-      const card = cards[i];
-      if (card && typeof card === "string") {
-        // index計算（row * 4 + col）
-        const cellIndex = i * 4 + suitIndex;
-        const slot = tableDiv.children[cellIndex];
-        if (!slot) continue;
-
-        // 画像生成
-        const img = document.createElement("img");
-        img.className = "card";
-        img.alt = card;
-        img.src = `/static/cards/${card}.png`;
-        img.onerror = () => {
-          console.warn("⚠️ カード画像の読み込みに失敗:", img.src);
-        };
-        slot.appendChild(img);
-      }
-    }
-  }
+      const img = document.createElement("img");
+      img.className = "card";
+      img.src = `/static/cards/${card}.png`;
+      img.alt = card;
+      slot.appendChild(img);
+    });
+  });
 });
+
 
 
 socket.on("announce_turn", data => {

@@ -326,11 +326,38 @@ def handle_join(data):
         emit("announce_turn", {"player": room_data["current_turn"]}, to=room)
         print(f"先行プレイヤー: {room_data['current_turn']}")
 
+    playable_cards = get_playable_cards(new_hand, table)
+
     print("テーブル : ", table)
     # 状態を全員に共有
     emit("update_table", {"table": table}, to=room)
-    emit("update_hand", {"username": username, "hand": new_hand}, room=room)
+    emit("update_hand", {"username": username, "hand": new_hand, "playable": playable_cards}, room=room)
 
+#出せるカード
+def get_playable_cards(hand, table):
+    suit_map = {"H": "hearts", "S": "spades", "D": "diamonds", "K": "clubs"}
+    playable = []
+
+    for card in hand:
+        suit = suit_map[card[0]]
+        num = int(card[1:])  # 1～13
+        row = table[suit]    # 例: ['None', ... , 'H7', ...]
+        index = num - 1      # 1始まり → 0始まりへ
+
+        if num == 7:
+            continue  # 7は既に出してあるので手札には無いはず
+
+        # 8〜13 → 左側（num-2）が埋まっているか
+        if num > 7 and row[index - 1] is not None:
+            playable.append(card)
+            continue
+
+        # 1〜6 → 右側（num）が埋まっているか
+        if num < 7 and row[index + 1] is not None:
+            playable.append(card)
+            continue
+
+    return playable
 
 
 @socketio.on("leave_lobby")

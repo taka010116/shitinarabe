@@ -145,6 +145,8 @@ socket.on("update_hand", data => {
     if (data.username === username) {
         const handDiv = document.getElementById("hand");
         handDiv.innerHTML = "";
+
+        const playable = new Set(data.playable);
         const sorted = data.hand.sort((a,b) => {
             const n1 = parseInt(a.slice(1)), n2 = parseInt(b.slice(1));
             const s1 = ["D","H","S","K"].indexOf(a[0]);
@@ -155,53 +157,20 @@ socket.on("update_hand", data => {
         sorted.forEach(card => {
             const c = document.createElement("img");
             c.src = `/static/cards/${card}.png`;
+            if (!playable.has(card)) {
+              c.style.opacity = "0.35";
+              c.style.pointerEvents = "none";
+            } else {
+              c.style.opacity = "1.0";
+              c.style.pointerEvents = "auto";
+              c.onclick = () => socket.emit("play_card", { username, room, card });
+            }
             c.className = "hand-card";
             c.onclick = () => socket.emit("play_card", { username, room, card });
             handDiv.appendChild(c);
         });
     }
 });
-
-// テーブル更新
-// --- テーブル更新イベント ---
-/*
-socket.on("update_table", data => {
-  console.log("📥 update_table:", data);
-
-  const table = data.table;
-  if (!table) {
-    console.warn("⚠️ table が undefined です:", data);
-    return;
-  }
-
-  const suits = ["hearts", "spades", "diamonds", "clubs"];
-  const tableDiv = document.getElementById("table");
-  tableDiv.innerHTML = "";
-
-  // カード位置を13行×4列で描画
-  for (let i = 0; i < 13; i++) {
-    const rowDiv = document.createElement("div");
-    rowDiv.className = "row";
-
-    suits.forEach(suit => {
-      const slot = document.createElement("div");
-      slot.className = "slot";
-
-      const card = table[suit][i];
-      if (card && typeof card === "string") {
-        const img = document.createElement("img");
-        img.src = `/static/cards/${card}.png`;
-        img.className = "card";
-        slot.appendChild(img);
-      }
-
-      rowDiv.appendChild(slot);
-    });
-
-    tableDiv.appendChild(rowDiv);
-  }
-});
-*/
 
 // テーブル更新イベント（この関数で #table を完全に置き換え）
 // --- テーブル更新イベント ---

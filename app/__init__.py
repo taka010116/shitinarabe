@@ -252,6 +252,34 @@ def handle_join(data):
     emit("update_table", {"table": table}, to=room)
     emit("update_hand", {"username": username, "hand": new_hand, "playable": playable_cards}, room=room)
 
+#CPUの操作
+def process_turn(room):
+    room_data = game_rooms[room]
+    current = room_data["current_turn"]
+    table = room_data["table"]
+
+    # ==== プレイヤーの番ならそのまま待つ ====
+    if not current.startswith("COM"):
+        return
+
+    hand = room_data["hands"][current]
+    playable = get_playable_cards(hand, table)
+
+    if playable:
+        card = random.choice(playable)
+        print(f"🤖 {current} が {card} を提出します")
+        handle_play_card({"username": current, "room": room, "card": card})
+    else:
+        print(f"🤖 {current} はパスします")
+        # ターンだけ進める
+        order = room_data["turn_order"]
+        i = order.index(current)
+        room_data["current_turn"] = order[(i+1) % len(order)]
+        emit("announce_turn", {"player": room_data["current_turn"]}, to=room)
+
+        # 次も COM なら続行
+        process_turn(room)
+
 #出せるカード
 def get_playable_cards(hand, table):
     suit_map = {"H": "hearts", "S": "spades", "D": "diamonds", "K": "clubs"}
@@ -316,7 +344,8 @@ def handle_play_card(data):
     emit("announce_turn", {"player": room_data["current_turn"]}, to=room)
 
     print(f"{username} が {card} を提出しました → 次は {room_data['current_turn']}")
-
+    process_turn(room)
+    
 
 @socketio.on("leave_lobby")
 def handle_leave(data):

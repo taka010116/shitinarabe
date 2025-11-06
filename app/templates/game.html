@@ -145,6 +145,8 @@ socket.on("update_hand", data => {
     if (data.username === username) {
         const handDiv = document.getElementById("hand");
         handDiv.innerHTML = "";
+        console.log("ターン : ", data.current_turn);
+        const currentTurn = data.current_turn;
 
         const playable = new Set(data.playable);
         const sorted = data.hand.sort((a,b) => {
@@ -163,7 +165,11 @@ socket.on("update_hand", data => {
             } else {
               c.style.opacity = "1.0";
               c.style.pointerEvents = "auto";
-              c.onclick = () => socket.emit("play_card", { username, room, card });
+              if( data.current_turn == username ){
+                c.onclick = () => socket.emit("play_card", { username, room, card });
+              }else{
+                console.log("あなたのターンではない");
+              }
             }
             c.className = "hand-card";
             c.onclick = () => socket.emit("play_card", { username, room, card });
@@ -216,7 +222,7 @@ socket.on("update_table", data => {
 
 
 socket.on("announce_turn", data => {
-    alert(`${data.player} のターンです！`);
+
 });
 
 

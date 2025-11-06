@@ -31,6 +31,11 @@
     <div class="suit" id="diamonds"></div>
     <div class="suit" id="clubs"></div>
 </div>
+<div id="turn-ui" style="margin-top:10px; font-size:20px;"></div>
+
+<button id="pass-btn" style="padding:8px; margin-top:8px; display:none;">
+  パスする（残り 3 回まで）
+</button>
 
 <style>
 #table {
@@ -222,8 +227,33 @@ socket.on("update_table", data => {
 
 
 socket.on("announce_turn", data => {
+    const { player, passes } = data;
+    const turnUI = document.getElementById("turn-ui");
 
+    let html = "<b>現在のターン：</b> " + player + "<br><br>";
+
+    html += "<table border='1' style='border-collapse: collapse;'>";
+    html += "<tr><th>プレイヤー</th><th>パス回数</th></tr>";
+
+    for (const p in passes) {
+        html += `<tr>
+            <td>${p}</td>
+            <td>${passes[p]} / 3</td>
+        </tr>`;
+    }
+    html += "</table>";
+
+    turnUI.innerHTML = html;
+
+    const passBtn = document.getElementById("pass-btn");
+    if (player === username && passes[username] < 3) {
+        passBtn.style.display = "block";
+        passBtn.innerText = `パスする（残り ${3 - passes[username]} 回）`;
+    } else {
+        passBtn.style.display = "none";
+    }
 });
+
 
 
 socket.on("card_played", data => {

@@ -175,7 +175,8 @@ def handle_join(data):
             "deck": deck,
             "all_hands": all_hands,
             "turn_order": [],
-            "current_turn": None
+            "current_turn": None,
+            "passes": { "COM1": 0, "COM2": 0 }
         }
 
         cpu_names = ["COM1", "COM2"]
@@ -204,6 +205,7 @@ def handle_join(data):
         idx = len(players)-1
         player_hand = room_data["all_hands"][idx]
         room_data["hands"][username] = player_hand
+        room_data["passes"][username] = 0
     else:
         player_hand = room_data["hands"][username]
 
@@ -345,6 +347,32 @@ def handle_play_card(data):
     emit("announce_turn", {"player": room_data["current_turn"]}, to=room)
 
     print(f"{username} が {card} を提出しました → 次は {room_data['current_turn']}")
+    process_turn(room)
+
+#パス処理
+@socketio.on("pass_turn")
+def handle_pass(data):
+    username = data["username"]
+    room = data["room"]
+
+    room_data = game_rooms[room]
+
+    # パス回数増加（3回超えたらパス不可 ※ 実際は UI 側で押せないようにする）
+    room_data["passes"][username] += 1
+    print(f"{username} はパスしました（現在: {room_data['passes'][username]}回）")
+
+    # ターンを回す
+    order = room_data["turn_order"]
+    current = room_data["current_turn"]
+    next_index = (order.index(current) + 1) % len(order)
+    room_data["current_turn"] = order[next_index]
+
+    emit("announce_turn", {
+        "player": room_data["current_turn"],
+        "passes": room_data["passes"]
+    }, to=room)
+
+    # COMなら自動進行
     process_turn(room)
 
 

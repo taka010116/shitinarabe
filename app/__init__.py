@@ -196,6 +196,7 @@ def handle_join(data):
     room_data = game_rooms[room]
     players = room_data["players"]
     table = room_data["table"]
+    turn = room_data["current_turn"]
 
     # プレイヤー登録と手札割り当て
     if username not in players:
@@ -250,7 +251,7 @@ def handle_join(data):
     print("テーブル : ", table)
     # 状態を全員に共有
     emit("update_table", {"table": table}, to=room)
-    emit("update_hand", {"username": username, "hand": new_hand, "playable": playable_cards}, room=room)
+    emit("update_hand", {"username": username, "hand": new_hand, "playable": playable_cards, "current_turn" : turn}, room=room)
 
 #CPUの操作
 def process_turn(room):
@@ -345,7 +346,7 @@ def handle_play_card(data):
 
     print(f"{username} が {card} を提出しました → 次は {room_data['current_turn']}")
     process_turn(room)
-    
+
 
 @socketio.on("leave_lobby")
 def handle_leave(data):

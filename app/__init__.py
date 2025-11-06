@@ -142,89 +142,8 @@ cards = [f"{s}{n}" for s in suits for n in numbers]
 def generate_deck():
     suits = ["H", "S", "D", "K"]
     return [f"{s}{i}" for s in suits for i in range(1, 14)] 
-"""
-@socketio.on("join_game")
-def handle_join(data):
-    room = data["room"]
-    username = data["username"]
-    join_room(room)
 
-    """
-"""
-    if room not in game_rooms:
-        game_rooms[room] = {
-            "deck": generate_deck(),
-            "players": {}, 
-            "hands": {}, 
-            "table": {"hearts":[], "spades":[], "diamonds":[], "clubs":[]}
-            }  
-    room_data = game_rooms[room]
-    deck = room_data["deck"]
-    print("デッキ:", deck)
-
-    hands = room_data["hands"]
-
-    if username not in hands:
-        # デッキからランダムに13枚取り出す
-        hand = random.sample(deck, 13)
-        hands[username] = hand
-        # デッキから削除
-        for card in hand:
-            deck.remove(card)
-
-    # デバッグ用：各プレイヤーの配牌
-    for u, h in hands.items():
-        print(f"{u} の配牌: {h}")
-
-    socketio.emit("update_hands", hands, room=room)
-    print("hands : ", hands)
-    # 全員に現在の手札を送信
-    #socketio.emit("update_hands", players, room=room)
-    """
-"""
-    #テーブルもサーバー側で管理する。
-    if room not in game_rooms:
-        random.shuffle(cards)
-        hands = [cards[i*13:(i+1)*13] for i in range(4)]
-        table = [[None for _ in range(13)] for _ in range(4)]  # 13×4 のマス
-        game_rooms[room] = {
-            "deck": generate_deck(),
-            "players": [], 
-            "hands": {}, 
-            "table": {
-                "hearts": [None] * 13,
-                "spades": [None] * 13,
-                "diamonds": [None] * 13,
-                "clubs": [None] * 13
-            }
-        }
-        for i, s in enumerate(suits):
-            table[i][6] = f"{s}7"  # 中央(7列目)に7を配置
-
-    # プレイヤー登録
-    game_rooms[room]["players"].append(username)
-    if username not in game_rooms[room]["hands"]:
-        game_rooms[room]["hands"][username] = hands[len(game_rooms[room]["players"]) - 1]
-
-    # 7を持っていた場合 → 自動でテーブルに置く
-    
-    for user, hand in list(hands.items()):
-        new_hand = []
-        for card in hand:
-            suit = card[0]
-            num = int(card[1:])
-            if num == 7:
-                # テーブルの中央（インデックス6）に置く
-                game_rooms[room]["table"][suit][6] = card
-                print(f"{user} が {card} を中央に配置しました")
-            else:
-                new_hand.append(card)
-        hands[user] = new_hand
-
-    # 状態を全員に送信
-    emit("update_table", {"table": game_rooms[room]["table"]}, to=room)
-    emit("update_hand", {"username": username, "hand": player_hand}, room=room)
-"""
+#一番最初
 @socketio.on("join_game")
 def handle_join(data):
     room = data["room"]
@@ -359,6 +278,45 @@ def get_playable_cards(hand, table):
 
     return playable
 
+#ゲーム進行係
+@socketio.on("play_card")
+def handle_play_card(data):
+    username = data["username"]
+    room = data["room"]
+    card = data["card"]
+
+    room_data = game_rooms[room]
+    table = room_data["table"]
+    hand = room_data["hands"][username]
+
+    suit_map = {"H": "hearts", "S": "spades", "D": "diamonds", "K": "clubs"}
+    suit = suit_map[card[0]]
+    num = int(card[1:])
+    index = num - 1
+
+    # --- カードを場に置く ---
+    table[suit][index] = card
+
+    # --- 手札から削除 ---
+    if card in hand:
+        hand.remove(card)
+
+    # --- 次のターンへ進める ---
+    order = room_data["turn_order"]
+    current = room_data["current_turn"]
+    next_index = (order.index(current) + 1) % len(order)
+    room_data["current_turn"] = order[next_index]
+
+    # --- 新しい手札の出せるカードを計算 ---
+    playable = get_playable_cards(hand, table)
+
+    # --- 画面更新を全員に送信 ---
+    emit("update_table", {"table": table}, to=room)
+    emit("update_hand", {"username": username, "hand": hand, "playable": playable}, to=room)
+    emit("announce_turn", {"player": room_data["current_turn"]}, to=room)
+
+    print(f"{username} が {card} を提出しました → 次は {room_data['current_turn']}")
+
 
 @socketio.on("leave_lobby")
 def handle_leave(data):
@@ -386,7 +344,7 @@ def handle_start():
         # 人数更新（残りのロビー人数を送信）
         broadcast_lobby_count()
 
-
+"""
 @socketio.on("play_card")
 def handle_play(data):
     room = data["room"]
@@ -398,7 +356,7 @@ def handle_play(data):
     suit = card[0]
     game_rooms[room]["table"][suit].append(card)
     emit("card_played", {"username": username, "card": card, "table": rooms[room]["table"]}, room=room)
-
+"""
 
 
 # ----------------------------

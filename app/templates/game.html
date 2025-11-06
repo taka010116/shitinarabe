@@ -31,10 +31,10 @@
     <div class="suit" id="diamonds"></div>
     <div class="suit" id="clubs"></div>
 </div>
-<div id="turn-ui" style="margin-top:10px; font-size:20px;"></div>
+<div id="players-ui" style="margin-top: 12px; font-size: 20px; display:flex; gap:25px; justify-content:center;"></div>
 
-<button id="pass-btn" style="padding:8px; margin-top:8px; display:none;">
-  パスする（残り 3 回まで）
+<button id="pass-btn" style="padding: 8px; margin-top: 10px; display: none;">
+  パス
 </button>
 
 <style>
@@ -227,28 +227,36 @@ socket.on("update_table", data => {
 
 
 socket.on("announce_turn", data => {
-    const { player, passes } = data;
-    const turnUI = document.getElementById("turn-ui");
+    const { player, passes, players } = data;  // ← players をサーバー側で送るように変更済みの前提
+    const playersUI = document.getElementById("players-ui");
 
-    let html = "<b>現在のターン：</b> " + player + "<br><br>";
+    let html = "";
+    players.forEach(p => {
+        const isTurn = (p === player);
+        const passCount = passes[p] ?? 0;
 
-    html += "<table border='1' style='border-collapse: collapse;'>";
-    html += "<tr><th>プレイヤー</th><th>パス回数</th></tr>";
+        html += `
+        <div style="text-align:center;">
+            <div style="
+                font-weight:bold;
+                color:${isTurn ? 'red' : 'black'};
+                text-decoration:${isTurn ? 'underline' : 'none'};
+            ">
+                ${p}
+            </div>
+            <div style="font-size:14px;">
+                パス : ${passCount} / 3
+            </div>
+        </div>
+        `;
+    });
 
-    for (const p in passes) {
-        html += `<tr>
-            <td>${p}</td>
-            <td>${passes[p]} / 3</td>
-        </tr>`;
-    }
-    html += "</table>";
-
-    turnUI.innerHTML = html;
+    playersUI.innerHTML = html;
 
     const passBtn = document.getElementById("pass-btn");
     if (player === username && passes[username] < 3) {
-        passBtn.style.display = "block";
-        passBtn.innerText = `パスする（残り ${3 - passes[username]} 回）`;
+        passBtn.style.display = "inline-block";
+        passBtn.innerText = `パス（残り ${3 - passes[username]}）`;
     } else {
         passBtn.style.display = "none";
     }

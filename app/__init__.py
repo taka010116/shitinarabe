@@ -188,18 +188,12 @@ def handle_join(data):
 
         print(f"CPUプレイヤー: {cpu_names} を追加しました")
 
-        # 7を中央に配置する
-        #for suit in ["hearts", "spades", "diamonds", "clubs"]:
-        #    table[suit][6] = None  # index=6 が「7」の位置（1始まり→0始まりで6）
-
-
-    # 既存データ取得
     room_data = game_rooms[room]
     players = room_data["players"]
     table = room_data["table"]
     turn = room_data["current_turn"]
 
-    # プレイヤー登録と手札割り当て
+    #プレイヤー登録と手札割り当て
     if username not in players:
         players.append(username)
         idx = len(players)-1
@@ -267,6 +261,15 @@ def process_turn(room):
 
     hand = room_data["hands"][current]
     playable = get_playable_cards(hand, table)
+
+    emit("announce_turn", {
+        "player": current,
+        "players": room_data["players"],
+        "passes": room_data["passes"]
+    }, to=room)
+
+    socketio.sleep(0.5)
+
 
     if playable:
         card = random.choice(playable)

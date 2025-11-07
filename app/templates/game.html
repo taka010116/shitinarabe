@@ -177,7 +177,7 @@ socket.on("update_hand", data => {
               }
             }
             c.className = "hand-card";
-            c.onclick = () => socket.emit("play_card", { username, room, card });
+            //c.onclick = () => socket.emit("play_card", { username, room, card });
             handDiv.appendChild(c);
         });
     }

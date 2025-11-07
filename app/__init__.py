@@ -264,6 +264,8 @@ def handle_join(data):
     emit("update_table", {"table": table}, to=room)
     emit("update_hand", {"username": username, "hand": new_hand, "playable": playable_cards, "current_turn" : room_data["current_turn"]}, room=room)
 
+    process_turn(room)
+    
 #CPUの操作
 def process_turn(room):
     room_data = game_rooms[room]

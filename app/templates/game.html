@@ -174,7 +174,7 @@ socket.on("update_hand", data => {
             } else {
               c.style.opacity = "1.0";
               c.style.pointerEvents = "auto";
-              if( isMyTurn ){
+              if( currentTurn === username ){
                 c.onclick = () => socket.emit("play_card", { username, room, card });
                 
               }else{

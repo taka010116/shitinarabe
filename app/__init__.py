@@ -265,7 +265,8 @@ def handle_join(data):
     emit("update_hand", {"username": username, "hand": new_hand, "playable": playable_cards, "current_turn" : room_data["current_turn"]}, room=room)
 
     process_turn(room)
-    
+
+"""
 #CPUの操作
 def process_turn(room):
     room_data = game_rooms[room]
@@ -302,6 +303,73 @@ def process_turn(room):
 
         # 次も COM なら続行
         process_turn(room)
+"""
+
+def process_turn(room):
+    room_data = game_rooms[room]
+    current = room_data["current_turn"]
+    table = room_data["table"]
+
+    # ==== プレイヤーの番ならそのまま待つ ====
+    if not current.startswith("COM"):
+        return
+
+    hand = room_data["hands"][current]
+    playable = get_playable_cards(hand, table)
+
+    socketio.sleep(0.6)
+
+    if playable:
+        card = random.choice(playable)
+        print(f"🤖 {current} が {card} を提出します")
+
+        handle_play_card({"username": current, "room": room, "card": card})
+
+        # ✅ 提出後の手札更新を通知
+        emit("update_hand", {
+            "username": current,
+            "hand": room_data["hands"][current],
+            "playable": get_playable_cards(room_data["hands"][current], room_data["table"]),
+            "current_turn": room_data["current_turn"]
+        }, to=room)
+
+        # ✅ テーブル表示更新
+        emit("update_table", {"table": room_data["table"]}, to=room)
+
+        # ✅ ターン変更アナウンス
+        emit("announce_turn", {
+            "player": room_data["current_turn"],
+            "players": room_data["players"],
+            "passes": room_data["passes"]
+        }, to=room)
+
+        # ✅ 次もCPUなら続行
+        process_turn(room)
+        return
+
+    else:
+        print(f"🤖 {current} はパスします")
+        order = room_data["turn_order"]
+        i = order.index(current)
+        room_data["current_turn"] = order[(i+1) % len(order)]
+
+        # ✅ パス直後も UI 更新が必要
+        emit("announce_turn", {
+            "player": room_data["current_turn"],
+            "players": room_data["players"],
+            "passes": room_data["passes"]
+        }, to=room)
+
+        emit("update_hand", {
+            "username": current,
+            "hand": hand,
+            "playable": playable,
+            "current_turn": room_data["current_turn"]
+        }, to=room)
+
+        # ✅ 次もCPUなら続行
+        process_turn(room)
+
 
 #出せるカード
 def get_playable_cards(hand, table):

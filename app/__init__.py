@@ -474,7 +474,7 @@ def handle_pass(data):
         "passes": room_data["passes"],
         "players": room_data["players"]
     }, to=room)
-
+    broadcast_update_hands(room)
     # COMなら自動進行
     process_turn(room)
 

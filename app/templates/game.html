@@ -262,8 +262,16 @@ socket.on("announce_turn", data => {
     if (player === username && passes[username] < 3) {
         passBtn.style.display = "inline-block";
         passBtn.innerText = `パス（残り ${3 - passes[username]}）`;
+
+        // ✅★ここ追加：パスを送信する処理★
+        passBtn.onclick = () => {
+            console.log("パス送信");
+            socket.emit("pass_turn", { username, room });
+        };
+
     } else {
         passBtn.style.display = "none";
+        passBtn.onclick = null; // 念のため無効化
     }
 });
 

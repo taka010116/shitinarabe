@@ -447,7 +447,7 @@ def handle_play_card(data):
     emit("update_table", {"table": table}, to=room)
     emit("update_hand", {"username": username, "hand": hand, "playable": playable}, to=room)
     emit("announce_turn", {"player": room_data["current_turn"], "players": room_data["players"], "passes": room_data["passes"]}, to=room)
-
+    broadcast_update_hands(room)
     print(f"{username} が {card} を提出しました → 次は {room_data['current_turn']}")
     process_turn(room)
 

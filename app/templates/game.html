@@ -112,6 +112,8 @@ socket.emit("join_game", {username, room});
 const suits = ["H", "S", "D", "K"]; // 各スートを上から順に行として使う
 const suitNames = { H: "hearts", S: "spades", D: "diamonds", K: "clubs" };
 
+let CTurn = null;
+
 function initTable() {
     const table = document.getElementById("table");
     table.innerHTML = "";
@@ -152,7 +154,7 @@ socket.on("update_hand", data => {
         handDiv.innerHTML = "";
         console.log("ターン : ", data.current_turn);
         const currentTurn = data.current_turn;
-
+        
         const playable = new Set(data.playable);
         const sorted = data.hand.sort((a,b) => {
             const n1 = parseInt(a.slice(1)), n2 = parseInt(b.slice(1));
@@ -160,6 +162,8 @@ socket.on("update_hand", data => {
             const s2 = ["D","H","S","K"].indexOf(b[0]);
             return s1 - s2 || n1 - n2;
         });
+        console.log("現在のターン : " + CTurn);
+        const isMyTurn = (CTurn === username);
 
         sorted.forEach(card => {
             const c = document.createElement("img");
@@ -170,8 +174,9 @@ socket.on("update_hand", data => {
             } else {
               c.style.opacity = "1.0";
               c.style.pointerEvents = "auto";
-              if( data.current_turn == username ){
+              if( isMyTurn ){
                 c.onclick = () => socket.emit("play_card", { username, room, card });
+                
               }else{
                 console.log("あなたのターンではない");
               }
@@ -229,7 +234,7 @@ socket.on("update_table", data => {
 socket.on("announce_turn", data => {
     const { player, passes, players } = data;  // ← players をサーバー側で送るように変更済みの前提
     const playersUI = document.getElementById("players-ui");
-
+    CTurn = player;
     let html = "";
     players.forEach(p => {
         const isTurn = (p === player);

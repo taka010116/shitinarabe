@@ -192,7 +192,9 @@ def handle_join(data):
     players = room_data["players"]
     table = room_data["table"]
     turn = room_data["current_turn"]
-
+    print("players : ", players)
+    
+    
     #プレイヤー登録と手札割り当て
     if username not in players:
         players.append(username)
@@ -235,6 +237,7 @@ def handle_join(data):
     
     # 手札更新
     room_data["hands"][username] = new_hand
+    print("turn_order : ", room_data["turn_order"])
 
     if room_data["current_turn"] is None:
         room_data["turn_order"] = random.sample(room_data["players"], len(room_data["players"]))

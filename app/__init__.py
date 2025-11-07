@@ -179,21 +179,21 @@ def handle_join(data):
             "passes": { "COM1": 0, "COM2": 0 }
         }
 
-        cpu_names = ["COM1", "COM2"]
-        game_rooms[room]["players"].extend(cpu_names)
+        ##cpu_names = ["COM1", "COM2"]
+        #game_rooms[room]["players"].extend(cpu_names)
 
-        for i, cpu in enumerate(cpu_names):
-            hand = all_hands[i]
-            game_rooms[room]["hands"][cpu] = hand
+        #for i, cpu in enumerate(cpu_names):
+        #    hand = all_hands[i]
+        #    game_rooms[room]["hands"][cpu] = hand
 
-        print(f"CPUプレイヤー: {cpu_names} を追加しました")
+        #print(f"CPUプレイヤー: {cpu_names} を追加しました")
 
     room_data = game_rooms[room]
     players = room_data["players"]
     table = room_data["table"]
     turn = room_data["current_turn"]
-    print("players : ", players)
     
+
     
     #プレイヤー登録と手札割り当て
     if username not in players:
@@ -205,6 +205,14 @@ def handle_join(data):
     else:
         player_hand = room_data["hands"][username]
 
+    cpu_names = ["COM1", "COM2"]
+    for i, cpu in enumerate(cpu_names):
+        if cpu not in room_data["players"]:
+            room_data["players"].append(cpu)
+            room_data["hands"][cpu] = room_data["all_hands"][room_data["players"].index(cpu)]
+            room_data["passes"][cpu] = 0
+
+    print("players : ", players)
     suit_map = {"H": "hearts", "S": "spades", "D": "diamonds", "K": "clubs"}
 
     # 自分の手札から7を探してテーブルに置く

@@ -333,6 +333,7 @@ def process_turn(room):
             "current_turn": room_data["current_turn"]
         }, to=room)
 
+        broadcast_update_hands(room)
         # ✅ テーブル表示更新
         emit("update_table", {"table": room_data["table"]}, to=room)
 
@@ -366,9 +367,23 @@ def process_turn(room):
             "playable": playable,
             "current_turn": room_data["current_turn"]
         }, to=room)
-
+        broadcast_update_hands(room)
         # ✅ 次もCPUなら続行
         process_turn(room)
+
+#update_handを全員に送る関数
+def broadcast_update_hands(room):
+    room_data = game_rooms[room]
+    table = room_data["table"]
+
+    for username, hand in room_data["hands"].items():
+        playable = get_playable_cards(hand, table)
+        emit("update_hand", {
+            "username": username,
+            "hand": hand,
+            "playable": playable,
+            "current_turn": room_data["current_turn"]
+        }, to=room)
 
 
 #出せるカード

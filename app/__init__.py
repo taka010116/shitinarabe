@@ -213,6 +213,7 @@ def handle_join(data):
             room_data["passes"][cpu] = 0
 
     print("players : ", players)
+    room_data["players"] = players
     suit_map = {"H": "hearts", "S": "spades", "D": "diamonds", "K": "clubs"}
 
     # 自分の手札から7を探してテーブルに置く
@@ -253,6 +254,7 @@ def handle_join(data):
         emit("announce_turn", {"player": room_data["current_turn"], "players": room_data["players"], "passes": room_data["passes"] }, to=room)
         print(f"先行プレイヤー: {room_data['current_turn']}")
     print("turn_order : ", room_data["turn_order"])
+
     playable_cards = get_playable_cards(new_hand, table)
 
     print("テーブル : ", table)

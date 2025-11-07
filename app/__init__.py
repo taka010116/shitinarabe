@@ -249,11 +249,11 @@ def handle_join(data):
     
     print("room_data[player] : ", room_data["players"])
     
-    if room_data["current_turn"] is None:
-        room_data["turn_order"] = random.sample(room_data["players"], len(room_data["players"]))
-        room_data["current_turn"] = room_data["turn_order"][0]
-        emit("announce_turn", {"player": room_data["current_turn"], "players": players, "passes": room_data["passes"] }, to=room)
-        print(f"先行プレイヤー: {room_data['current_turn']}")
+    #if room_data["current_turn"] is None:
+    room_data["turn_order"] = random.sample(room_data["players"], len(room_data["players"]))
+    room_data["current_turn"] = room_data["turn_order"][0]
+    emit("announce_turn", {"player": room_data["current_turn"], "players": players, "passes": room_data["passes"] }, to=room)
+    print(f"先行プレイヤー: {room_data['current_turn']}")
     
     print("turn_order : ", room_data["turn_order"])
 

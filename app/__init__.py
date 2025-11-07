@@ -262,7 +262,7 @@ def handle_join(data):
     print("テーブル : ", table)
     # 状態を全員に共有
     emit("update_table", {"table": table}, to=room)
-    emit("update_hand", {"username": username, "hand": new_hand, "playable": playable_cards, "current_turn" : turn}, room=room)
+    emit("update_hand", {"username": username, "hand": new_hand, "playable": playable_cards, "current_turn" : room_data["current_turn"]}, room=room)
 
 #CPUの操作
 def process_turn(room):

@@ -239,7 +239,7 @@ def handle_join(data):
     if room_data["current_turn"] is None:
         room_data["turn_order"] = random.sample(room_data["players"], len(room_data["players"]))
         room_data["current_turn"] = room_data["turn_order"][0]
-        emit("announce_turn", {"player": room_data["current_turn"], "players": room_data["players"]}, to=room)
+        emit("announce_turn", {"player": room_data["current_turn"], "players": room_data["players"], "passes": room_data["passes"] }, to=room)
         print(f"先行プレイヤー: {room_data['current_turn']}")
 
     playable_cards = get_playable_cards(new_hand, table)
@@ -281,7 +281,7 @@ def process_turn(room):
         order = room_data["turn_order"]
         i = order.index(current)
         room_data["current_turn"] = order[(i+1) % len(order)]
-        emit("announce_turn", {"player": room_data["current_turn"], "players": room_data["players"]}, to=room)
+        emit("announce_turn", {"player": room_data["current_turn"], "players": room_data["players"], "passes": room_data["passes"] }, to=room)
 
         # 次も COM なら続行
         process_turn(room)
@@ -341,13 +341,12 @@ def handle_play_card(data):
     next_index = (order.index(current) + 1) % len(order)
     room_data["current_turn"] = order[next_index]
 
-    # --- 新しい手札の出せるカードを計算 ---
     playable = get_playable_cards(hand, table)
 
     # --- 画面更新を全員に送信 ---
     emit("update_table", {"table": table}, to=room)
     emit("update_hand", {"username": username, "hand": hand, "playable": playable}, to=room)
-    emit("announce_turn", {"player": room_data["current_turn"], "players": room_data["players"]}, to=room)
+    emit("announce_turn", {"player": room_data["current_turn"], "players": room_data["players"], "passes": room_data["passes"]}, to=room)
 
     print(f"{username} が {card} を提出しました → 次は {room_data['current_turn']}")
     process_turn(room)

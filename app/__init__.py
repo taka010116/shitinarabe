@@ -176,17 +176,10 @@ def handle_join(data):
             "all_hands": all_hands,
             "turn_order": [],
             "current_turn": None,
-            "passes": { "COM1": 0, "COM2": 0 }
+            "passes": { "COM1": 0, "COM2": 0 },
+            "ranking": [],
+            "alive": {}
         }
-
-        ##cpu_names = ["COM1", "COM2"]
-        #game_rooms[room]["players"].extend(cpu_names)
-
-        #for i, cpu in enumerate(cpu_names):
-        #    hand = all_hands[i]
-        #    game_rooms[room]["hands"][cpu] = hand
-
-        #print(f"CPUプレイヤー: {cpu_names} を追加しました")
 
     room_data = game_rooms[room]
     players = room_data["players"]
@@ -212,6 +205,11 @@ def handle_join(data):
             room_data["hands"][cpu] = room_data["all_hands"][room_data["players"].index(cpu)]
             room_data["passes"][cpu] = 0
 
+    for p in game_rooms[room]["players"]:
+        game_rooms[room]["alive"][p] = True
+        game_rooms[room]["passes"][p] = 0
+
+    print("生き残り : ", game_rooms[room]["alive"])
     print("players : ", players)
     room_data["players"] = players
     suit_map = {"H": "hearts", "S": "spades", "D": "diamonds", "K": "clubs"}
@@ -265,45 +263,6 @@ def handle_join(data):
     emit("update_hand", {"username": username, "hand": new_hand, "playable": playable_cards, "current_turn" : room_data["current_turn"]}, room=room)
 
     process_turn(room)
-
-"""
-#CPUの操作
-def process_turn(room):
-    room_data = game_rooms[room]
-    current = room_data["current_turn"]
-    table = room_data["table"]
-
-    # ==== プレイヤーの番ならそのまま待つ ====
-    if not current.startswith("COM"):
-        return
-
-    hand = room_data["hands"][current]
-    playable = get_playable_cards(hand, table)
-
-    emit("announce_turn", {
-        "player": current,
-        "players": room_data["players"],
-        "passes": room_data["passes"]
-    }, to=room)
-
-    socketio.sleep(0.5)
-
-
-    if playable:
-        card = random.choice(playable)
-        print(f"🤖 {current} が {card} を提出します")
-        handle_play_card({"username": current, "room": room, "card": card})
-    else:
-        print(f"🤖 {current} はパスします")
-        # ターンだけ進める
-        order = room_data["turn_order"]
-        i = order.index(current)
-        room_data["current_turn"] = order[(i+1) % len(order)]
-        emit("announce_turn", {"player": room_data["current_turn"], "players": room_data["players"], "passes": room_data["passes"] }, to=room)
-
-        # 次も COM なら続行
-        process_turn(room)
-"""
 
 def process_turn(room):
     room_data = game_rooms[room]
@@ -450,6 +409,7 @@ def handle_play_card(data):
     broadcast_update_hands(room)
     print(f"{username} が {card} を提出しました → 次は {room_data['current_turn']}")
     process_turn(room)
+    check_elimination(room)
 
 #パス処理
 @socketio.on("pass_turn")
@@ -477,6 +437,80 @@ def handle_pass(data):
     broadcast_update_hands(room)
     # COMなら自動進行
     process_turn(room)
+    check_elimination(room)
+
+#敗北処理
+def eliminate_player(room, player):
+    room_data = game_rooms[room]
+    table = room_data["table"]
+    hand = room_data["hands"][player]
+
+    print(f"{player} は敗北しました！")
+
+    # 手札を全て場に公開
+    suit_map = {"H": "hearts", "S": "spades", "D": "diamonds", "K": "clubs"}
+    for card in hand:
+        suit = suit_map[card[0]]
+        num = int(card[1:])
+        index = num - 1
+        table[suit][index] = card
+
+    hand.clear()
+
+    # プレイヤーを脱落状態に変更
+    room_data["alive"][player] = False
+    room_data["rankings"].append(player)
+
+    # ターン順から除外
+    order = room_data["turn_order"]
+    if player in order:
+        order.remove(player)
+
+    # もし残り1人なら → ゲーム終了
+    alive_players = [p for p, ok in room_data["alive"].items() if ok]
+    if len(alive_players) == 1:
+        winner = alive_players[0]
+        room_data["rankings"].append(winner)  # 最後の1人が優勝
+        emit("game_over", {"rankings": room_data["rankings"]}, to=room)
+        print("🎉 ゲーム終了:", room_data["rankings"])
+        return
+
+    # UI更新
+    emit("update_table", {"table": table}, to=room)
+    broadcast_update_hands(room)
+
+    # 敗北通知
+    emit("player_eliminated", {
+        "player": player,
+        "rank": len(room_data["rankings"])
+    }, to=room)
+
+#敗北チェック
+def check_elimination(room):
+    room_data = game_rooms[room]
+    current = room_data["current_turn"]
+
+    if room_data["alive"][current] is False:
+        return  # 既に脱落済みなら無視
+
+    hand = room_data["hands"][current]
+    playable = get_playable_cards(hand, room_data["table"])
+
+    # ✅ 出せるカードが無い → 即敗北
+    if len(playable) == 0:
+        eliminate_player(room, current)
+
+        # ターンを次の生存者に回す
+        alive_order = [p for p in room_data["turn_order"] if room_data["alive"][p]]
+        room_data["current_turn"] = alive_order[0]
+
+        emit("announce_turn", {
+            "player": room_data["current_turn"],
+            "players": room_data["players"],
+            "passes": room_data["passes"]
+        }, to=room)
+
+        process_turn(room)
 
 
 @socketio.on("leave_lobby")

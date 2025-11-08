@@ -303,6 +303,26 @@
   const links = document.querySelectorAll(".green-box a");
   const descBox = document.getElementById("desc-box");
 
+  document.addEventListener("DOMContentLoaded", () => {
+  // ここに存在するカード画像を列挙（必要に応じて追加/削除）
+  const cards = [
+    "/static/cards/D1.png",
+    "/static/cards/D2.png",
+    "/static/cards/D3.png",
+    "/static/cards/H5.png",
+    "/static/cards/S12.png",
+    "/static/cards/C7.png",
+    "/static/cards/JOKER.png"
+  ];
+
+  const randomCard = cards[Math.floor(Math.random() * cards.length)];
+
+  document.body.style.backgroundImage = `url(${randomCard})`;
+  document.body.style.backgroundSize = "cover";      // 画面全体にフィット
+  document.body.style.backgroundRepeat = "no-repeat";
+  document.body.style.backgroundPosition = "center";
+});
+
   links.forEach(link => {
     link.addEventListener("mouseover", () => {
       descBox.textContent = link.dataset.desc;

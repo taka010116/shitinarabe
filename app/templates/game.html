@@ -154,7 +154,7 @@ socket.on("update_hand", data => {
         handDiv.innerHTML = "";
         console.log("ターン : ", data.current_turn);
         const currentTurn = data.current_turn;
-        
+        const passes = data.passes;
         const playable = new Set(data.playable);
         const sorted = data.hand.sort((a,b) => {
             const n1 = parseInt(a.slice(1)), n2 = parseInt(b.slice(1));
@@ -166,10 +166,10 @@ socket.on("update_hand", data => {
         console.log("パス回数:" + passes[username]);
         if( playable.length === 0 ){
           console.log("出せるカードがありません。");
-          //if( passes[username] === 0 ){
-          //  socket.emit("lose", {player: username});
-          //  return;
-          //}
+          if( passes[username] === 0 ){
+            socket.emit("lose", {player: username});
+            return;
+          }
 
         }
         console.log("現在のターン : " + CTurn);

@@ -166,10 +166,10 @@ socket.on("update_hand", data => {
         console.log("パス回数:" + passes[username]);
         if( playable.length === 0 ){
           console.log("出せるカードがありません。");
-          if( passes[username] === 0 ){
-            socket.emit("lose", {player: username});
-            return;
-          }
+          //if( passes[username] === 0 ){
+          //  socket.emit("lose", {player: username});
+          //  return;
+          //}
 
         }
         console.log("現在のターン : " + CTurn);

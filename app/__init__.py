@@ -260,7 +260,7 @@ def handle_join(data):
     print("テーブル : ", table)
     # 状態を全員に共有
     emit("update_table", {"table": table}, to=room)
-    emit("update_hand", {"username": username, "hand": new_hand, "playable": playable_cards, "current_turn" : room_data["current_turn"]}, room=room)
+    emit("update_hand", {"username": username, "hand": new_hand, "playable": playable_cards, "current_turn" : room_data["current_turn"],"passes": room_data["passes"] }, room=room)
 
     process_turn(room)
 
@@ -296,7 +296,8 @@ def process_turn(room):
             "username": current,
             "hand": room_data["hands"][current],
             "playable": get_playable_cards(room_data["hands"][current], room_data["table"]),
-            "current_turn": room_data["current_turn"]
+            "current_turn": room_data["current_turn"],
+            "passes": room_data["passes"]
         }, to=room)
 
         broadcast_update_hands(room)
@@ -331,7 +332,8 @@ def process_turn(room):
             "username": current,
             "hand": hand,
             "playable": playable,
-            "current_turn": room_data["current_turn"]
+            "current_turn": room_data["current_turn"],
+            "passes": room_data["passes"]
         }, to=room)
         broadcast_update_hands(room)
         # ✅ 次もCPUなら続行
@@ -348,7 +350,8 @@ def broadcast_update_hands(room):
             "username": username,
             "hand": hand,
             "playable": playable,
-            "current_turn": room_data["current_turn"]
+            "current_turn": room_data["current_turn"],
+            "passes": room_data["passes"]
         }, to=room)
 
 
@@ -411,7 +414,7 @@ def handle_play_card(data):
 
     # --- 画面更新を全員に送信 ---
     emit("update_table", {"table": table}, to=room)
-    emit("update_hand", {"username": username, "hand": hand, "playable": playable}, to=room)
+    emit("update_hand", {"username": username, "hand": hand, "playable": playable, "passes": room_data["passes"]}, to=room)
     emit("announce_turn", {"player": room_data["current_turn"], "players": room_data["players"], "passes": room_data["passes"]}, to=room)
     broadcast_update_hands(room)
     print(f"{username} が {card} を提出しました → 次は {room_data['current_turn']}")
@@ -579,7 +582,8 @@ def advance_turn(room):
             "username": p,
             "hand": room_data["hands"][p],
             "playable": get_playable_cards(room_data["hands"][p], room_data["table"]),
-            "current_turn": room_data["current_turn"]
+            "current_turn": room_data["current_turn"],
+            "passes": room_data["passes"]
         }, to=room)
 
     # 次が CPU なら続行

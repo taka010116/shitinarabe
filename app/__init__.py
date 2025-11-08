@@ -276,6 +276,13 @@ def process_turn(room):
     hand = room_data["hands"][current]
     playable = get_playable_cards(hand, table)
 
+    if room_data["passes"].get(current, 0) >= 3 and len(playable) == 0:
+        eliminate_player(room, current)
+        advance_turn(room)
+        print("敗北")
+        return
+
+
     socketio.sleep(0.6)
 
     if playable:
@@ -544,6 +551,38 @@ def check_elimination(room):
         }, to=room)
 
         process_turn(room)
+
+def advance_turn(room):
+    room_data = game_rooms[room]
+    order = room_data["turn_order"]
+    cur = room_data["current_turn"]
+    idx = order.index(cur)
+
+    # 次の生存プレイヤーを探す
+    for i in range(1, len(order)+1):
+        nxt = order[(idx + i) % len(order)]
+        if room_data["alive"].get(nxt, True):
+            room_data["current_turn"] = nxt
+            break
+
+    # UI 更新
+    emit("announce_turn", {
+        "player": room_data["current_turn"],
+        "players": room_data["players"],
+        "passes": room_data["passes"]
+    }, to=room)
+
+    # 画面手札更新
+    for p in room_data["players"]:
+        emit("update_hand", {
+            "username": p,
+            "hand": room_data["hands"][p],
+            "playable": get_playable_cards(room_data["hands"][p], room_data["table"]),
+            "current_turn": room_data["current_turn"]
+        }, to=room)
+
+    # 次が CPU なら続行
+    process_turn(room)
 
 
 @socketio.on("leave_lobby")

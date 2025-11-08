@@ -162,6 +162,16 @@ socket.on("update_hand", data => {
             const s2 = ["D","H","S","K"].indexOf(b[0]);
             return s1 - s2 || n1 - n2;
         });
+        
+        console.log("パス回数:" + passes[username]);
+        if( playable.length === 0 ){
+          console.log("出せるカードがありません。");
+          if( passes[username] === 0 ){
+            socket.emit("lose", {player: username});
+            return;
+          }
+
+        }
         console.log("現在のターン : " + CTurn);
         const isMyTurn = (CTurn === username);
 

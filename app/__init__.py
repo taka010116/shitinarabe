@@ -416,7 +416,7 @@ def handle_play_card(data):
     broadcast_update_hands(room)
     print(f"{username} が {card} を提出しました → 次は {room_data['current_turn']}")
     process_turn(room)
-    check_elimination(room)
+    #check_elimination(room)
 
 #パス処理
 @socketio.on("pass_turn")
@@ -477,9 +477,10 @@ def handle_pass(data):
     broadcast_update_hands(room)
     # COMなら自動進行
     process_turn(room)
-    check_elimination(room)
+    #check_elimination(room)
 
 #敗北処理
+@socketio.on("lose")
 def eliminate_player(room, player):
     room_data = game_rooms[room]
     table = room_data["table"]

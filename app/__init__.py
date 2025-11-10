@@ -323,7 +323,8 @@ def process_turn(room):
         i = order.index(current)
         room_data["current_turn"] = order[(i+1) % len(order)]
         hand_counts = { p: len(room_data["hands"][p]) for p in room_data["players"] }
-
+        room_data["passes"][current] = room_data["passes"].get(current, 0) + 1
+        
         # ✅ パス直後も UI 更新が必要
         emit("announce_turn", {
             "player": room_data["current_turn"],

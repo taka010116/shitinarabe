@@ -517,7 +517,7 @@ def eliminate_player(room, player):
 
     # プレイヤーを脱落状態に変更
     room_data["alive"][player] = False
-    room_data["rankings"].append(player)
+    room_data["ranking"].append(player)
 
     # ターン順から除外
     order = room_data["turn_order"]
@@ -528,9 +528,9 @@ def eliminate_player(room, player):
     alive_players = [p for p, ok in room_data["alive"].items() if ok]
     if len(alive_players) == 1:
         winner = alive_players[0]
-        room_data["rankings"].append(winner)  # 最後の1人が優勝
-        emit("game_over", {"rankings": room_data["rankings"]}, to=room)
-        print("🎉 ゲーム終了:", room_data["rankings"])
+        room_data["ranking"].append(winner)  # 最後の1人が優勝
+        emit("game_over", {"ranking": room_data["ranking"]}, to=room)
+        print("🎉 ゲーム終了:", room_data["ranking"])
         return
 
     # UI更新
@@ -540,7 +540,7 @@ def eliminate_player(room, player):
     # 敗北通知
     emit("player_eliminated", {
         "player": player,
-        "rank": len(room_data["rankings"])
+        "rank": len(room_data["ranking"])
     }, to=room)
 
 #敗北チェック

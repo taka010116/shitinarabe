@@ -301,6 +301,7 @@ def process_turn(room):
         }, to=room)
 
         broadcast_update_hands(room)
+        check_clear(room, current)
         # ✅ テーブル表示更新
         emit("update_table", {"table": room_data["table"]}, to=room)
         hand_counts = { p: len(room_data["hands"][p]) for p in room_data["players"] }
@@ -324,7 +325,7 @@ def process_turn(room):
         room_data["current_turn"] = order[(i+1) % len(order)]
         hand_counts = { p: len(room_data["hands"][p]) for p in room_data["players"] }
         room_data["passes"][current] = room_data["passes"].get(current, 0) + 1
-        
+
         # ✅ パス直後も UI 更新が必要
         emit("announce_turn", {
             "player": room_data["current_turn"],
@@ -409,6 +410,7 @@ def handle_play_card(data):
     if card in hand:
         hand.remove(card)
 
+    check_clear(room, username)
     # --- 次のターンへ進める ---
     order = room_data["turn_order"]
     current = room_data["current_turn"]
@@ -569,6 +571,32 @@ def check_elimination(room):
         }, to=room)
 
         process_turn(room)
+
+#勝利判定
+def check_clear(room, username):
+    room_data = game_rooms[room]
+
+    # すでに脱落・勝利済みなら何もしない
+    if not room_data["alive"][username]:
+        return
+
+    hand_empty = (len(room_data["hands"][username]) == 0)
+    pass_ok = (room_data["passes"].get(username, 0) < 4)
+
+    if hand_empty and pass_ok:
+        # ✅ 勝利確定
+        room_data["alive"][username] = False
+        room_data["rankings"].append(username)
+        print(f"✅ {username} がクリア！（順位: {len(room_data['rankings'])} 位）")
+
+        emit("player_cleared", {
+            "username": username,
+            "rank": len(room_data["rankings"]),
+        }, to=room)
+
+        # ✅ 次のプレイヤーにターン回す
+        advance_turn(room)
+
 
 def advance_turn(room):
     room_data = game_rooms[room]

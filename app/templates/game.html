@@ -242,7 +242,7 @@ socket.on("update_table", data => {
 
 
 socket.on("announce_turn", data => {
-    const { player, passes, players } = data;  // ← players をサーバー側で送るように変更済みの前提
+    const { player, passes, players, hand_counts } = data;  // ← players をサーバー側で送るように変更済みの前提
     const playersUI = document.getElementById("players-ui");
     CTurn = player;
     let html = "";

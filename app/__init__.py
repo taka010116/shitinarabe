@@ -412,11 +412,17 @@ def handle_play_card(data):
 
     check_clear(room, username)
     # --- 次のターンへ進める ---
-    order = room_data["turn_order"]
+    order = room_data["alive"]
     current = room_data["current_turn"]
-    next_index = (order.index(current) + 1) % len(order)
-    room_data["current_turn"] = order[next_index]
-
+    if current not in order:
+        # もし今のプレイヤーがもうaliveにいなければ先頭へ
+        room_data["current_turn"] = order[0]
+    else:
+        next_index = (order.index(current) + 1) % len(order)
+        room_data["current_turn"] = order[next_index]
+    #next_index = (order.index(current) + 1) % len(order)
+    #room_data["current_turn"] = order[next_index]
+    print("alive : ", room_data["alive"])
     playable = get_playable_cards(hand, table)
     hand_counts = { p: len(room_data["hands"][p]) for p in room_data["players"] }
 

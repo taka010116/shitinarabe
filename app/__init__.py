@@ -606,10 +606,13 @@ def check_clear(room, username):
 
 def advance_turn(room):
     room_data = game_rooms[room]
-    order = room_data["turn_order"]
+    #order = room_data["turn_order"]
+    order = list(room_data["alive"].keys()) if isinstance(room_data["alive"], dict) else room_data["alive"]
     cur = room_data["current_turn"]
     idx = order.index(cur)
+    print("oder", order)
 
+    
     # 次の生存プレイヤーを探す
     for i in range(1, len(order)+1):
         nxt = order[(idx + i) % len(order)]

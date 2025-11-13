@@ -412,7 +412,7 @@ def handle_play_card(data):
 
     check_clear(room, username)
     # --- 次のターンへ進める ---
-    order = room_data["alive"]
+    order = list(room_data["alive"].keys())
     current = room_data["current_turn"]
     if current not in order:
         # もし今のプレイヤーがもうaliveにいなければ先頭へ

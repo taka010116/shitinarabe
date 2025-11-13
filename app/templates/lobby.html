@@ -84,7 +84,7 @@
 
         // ゲーム開始通知
         socket.on("match_found", data => {
-          alert(`対局開始！参加者: ${data.players.join(", ")}`);
+          //alert(`対局開始！参加者: ${data.players.join(", ")}`);
           console.log("📡 対局開始イベントを受信しました:");
           console.log("受信データ:", data); // ← data全体を表示
           console.log("ルームID:", data.room_id);

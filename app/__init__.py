@@ -451,6 +451,7 @@ def handle_pass(data):
         eliminate_player(room, username)
         hand_counts = { p: len(room_data["hands"][p]) for p in room_data["players"] }
 
+        """
         emit("update_table", {"table": room_data["table"]}, to=room)
         emit("announce_turn", {
             "player": room_data["current_turn"],
@@ -458,6 +459,7 @@ def handle_pass(data):
             "passes": room_data["passes"],
             "hand_counts": hand_counts 
         }, to=room)
+        """
 
         # ✅ 次の生存プレイヤーへターンを進める
         order = room_data["turn_order"]
@@ -483,14 +485,26 @@ def handle_pass(data):
         process_turn(room)
         return
 
+    print("パス処理、turn_order : ", room_data["turn_order"])
 
     # ターンを回す
+    order = room_data["turn_order"]
+    alive_players = [p for p in order if room_data["alive"].get(p, False)]
+
+    idx = order.index(username)  # パスしたプレイヤー
+    for i in range(1, len(order)+1):
+        next_player = order[(idx + i) % len(order)]
+        if next_player in alive_players:
+            room_data["current_turn"] = next_player
+            break
+    
+    """
     order = room_data["turn_order"]
     current = room_data["current_turn"]
     next_index = (order.index(current) + 1) % len(order)
     room_data["current_turn"] = order[next_index]
     hand_counts = { p: len(room_data["hands"][p]) for p in room_data["players"] }
-
+    """
     emit("announce_turn", {
         "player": room_data["current_turn"],
         "passes": room_data["passes"],

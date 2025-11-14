@@ -283,7 +283,7 @@ def process_turn(room):
         return
 
 
-    socketio.sleep(0.6)
+    socketio.sleep(1.0)
 
     if playable:
         card = random.choice(playable)
@@ -524,6 +524,8 @@ def eliminate_player(room, player):
     # プレイヤーを脱落状態に変更
     room_data["alive"][player] = False
     room_data["ranking"].append(player)
+
+    print("除外, Ranking :", room_data["ranking"])
 
     # ターン順から除外
     order = room_data["turn_order"]

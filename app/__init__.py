@@ -612,7 +612,14 @@ def advance_turn(room):
     idx = order.index(cur)
     print("oder", order)
 
+    if cur not in order:
+        if order:
+            room_data["current_turn"] = order[0]
+        else:
+            print(f"[DEBUG] 全員死亡 or ゲーム終了 room={room}")
+            return
     
+    print("cur", cur)
     # 次の生存プレイヤーを探す
     for i in range(1, len(order)+1):
         nxt = order[(idx + i) % len(order)]

@@ -503,8 +503,9 @@ def handle_pass(data):
     current = room_data["current_turn"]
     next_index = (order.index(current) + 1) % len(order)
     room_data["current_turn"] = order[next_index]
-    hand_counts = { p: len(room_data["hands"][p]) for p in room_data["players"] }
     """
+    hand_counts = { p: len(room_data["hands"][p]) for p in room_data["players"] }
+
     emit("announce_turn", {
         "player": room_data["current_turn"],
         "passes": room_data["passes"],

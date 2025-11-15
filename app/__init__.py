@@ -428,7 +428,7 @@ def handle_pass(data):
     #パス4回死亡
     if room_data["passes"][username] >= 4:
         eliminate_player(room, username)
-    
+        hand_counts = { p: len(room_data["hands"][p]) for p in room_data["players"] }
 
     hand_counts = { p: len(room_data["hands"][p]) for p in room_data["players"] }
     advance_turn(room)
@@ -465,10 +465,7 @@ def eliminate_player(room, player):
 
     print("除外, Ranking :", room_data["ranking"])
 
-    # ターン順から除外
-    order = room_data["turn_order"]
-    if player in order:
-        order.remove(player)
+    
 
     # もし残り1人なら → ゲーム終了
     alive_players = [p for p, ok in room_data["alive"].items() if ok]
@@ -482,7 +479,12 @@ def eliminate_player(room, player):
     # UI更新
     emit("update_table", {"table": table}, to=room)
     broadcast_update_hands(room)
-
+    
+    # ターン順から除外
+    order = room_data["turn_order"]
+    if player in order:
+        order.remove(player)
+    
     # 敗北通知
     emit("player_eliminated", {
         "player": player,
@@ -490,7 +492,7 @@ def eliminate_player(room, player):
     }, to=room)
 
     advance_turn(room)
-    
+
 
 #敗北チェック
 def check_elimination(room):

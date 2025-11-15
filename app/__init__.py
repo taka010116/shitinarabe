@@ -432,6 +432,8 @@ def handle_pass(data):
 
     hand_counts = { p: len(room_data["hands"][p]) for p in room_data["players"] }
     advance_turn(room)
+    print("現在の順番 : ", room_data["current_turn"])
+
     emit("announce_turn", {
         "player": room_data["current_turn"],
         "passes": room_data["passes"],
@@ -479,7 +481,7 @@ def eliminate_player(room, player):
     # UI更新
     emit("update_table", {"table": table}, to=room)
     broadcast_update_hands(room)
-    
+
     # ターン順から除外
     order = room_data["turn_order"]
     if player in order:
@@ -548,7 +550,8 @@ def check_clear(room, username):
         # ✅ 次のプレイヤーにターン回す
         advance_turn(room)
 
-
+"""
+#ターンを回す
 def advance_turn(room):
     room_data = game_rooms[room]
     order = room_data["turn_order"]
@@ -593,6 +596,53 @@ def advance_turn(room):
         }, to=room)
 
     # 次が CPU なら続行
+    process_turn(room)
+"""
+
+    
+def advance_turn(room):
+    room_data = game_rooms[room]
+    order = room_data["turn_order"]
+
+    if not order:
+        print(f"[DEBUG] 全員死亡 or ゲーム終了 room={room}")
+        return
+
+    cur = room_data.get("current_turn")
+
+    # cur が turn_order にない場合は最初の生存プレイヤーにする
+    if cur not in order or not room_data["alive"].get(cur, False):
+        for p in order:
+            if room_data["alive"].get(p, False):
+                room_data["current_turn"] = p
+                cur = p
+                break
+    else:
+        # 次の生存プレイヤーを探す
+        idx = order.index(cur)
+        next_player = None
+        for i in range(1, len(order)+1):
+            p = order[(idx + i) % len(order)]
+            if room_data["alive"].get(p, False):
+                next_player = p
+                break
+        if next_player:
+            room_data["current_turn"] = next_player
+
+    # hand_counts 更新
+    hand_counts = { p: len(room_data["hands"][p]) for p in room_data["players"] }
+
+    # UI更新
+    emit("announce_turn", {
+        "player": room_data["current_turn"],
+        "players": room_data["players"],
+        "passes": room_data["passes"],
+        "hand_counts": hand_counts
+    }, to=room)
+
+    broadcast_update_hands(room)
+
+    # 次がCPUなら続行
     process_turn(room)
 
 

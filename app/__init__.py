@@ -264,6 +264,7 @@ def handle_join(data):
 
     process_turn(room)
 
+#CPUの操作
 def process_turn(room):
     room_data = game_rooms[room]
     current = room_data["current_turn"]
@@ -320,11 +321,8 @@ def process_turn(room):
 
     else:
         print(f"🤖 {current} はパスします")
-        order = room_data["turn_order"]
-        i = order.index(current)
-        room_data["current_turn"] = order[(i+1) % len(order)]
-        hand_counts = { p: len(room_data["hands"][p]) for p in room_data["players"] }
-        room_data["passes"][current] = room_data["passes"].get(current, 0) + 1
+        #パス処理
+        handle_pass({"username": current, "room": room})
 
         # ✅ パス直後も UI 更新が必要
         emit("announce_turn", {
@@ -343,7 +341,7 @@ def process_turn(room):
         }, to=room)
         broadcast_update_hands(room)
         # ✅ 次もCPUなら続行
-        process_turn(room)
+        #process_turn(room)
 
 #update_handを全員に送る関数
 def broadcast_update_hands(room):

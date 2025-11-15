@@ -392,6 +392,7 @@ def handle_play_card(data):
 
     check_clear(room, username)
     # --- 次のターンへ進める ---
+    """
     order = list(room_data["alive"].keys())
     current = room_data["current_turn"]
     if current not in order:
@@ -400,6 +401,9 @@ def handle_play_card(data):
     else:
         next_index = (order.index(current) + 1) % len(order)
         room_data["current_turn"] = order[next_index]
+    
+    """
+    advance_turn(room)
     #next_index = (order.index(current) + 1) % len(order)
     #room_data["current_turn"] = order[next_index]
     print("alive : ", room_data["alive"])

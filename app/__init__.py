@@ -602,49 +602,40 @@ def advance_turn(room):
     
 def advance_turn(room):
     room_data = game_rooms[room]
-    order = room_data["turn_order"]
 
-    if not order:
+    # --- 生存者リストを作成 ---
+    alive_players = [p for p in room_data["turn_order"] if room_data["alive"].get(p, False)]
+
+    if not alive_players:
         print(f"[DEBUG] 全員死亡 or ゲーム終了 room={room}")
         return
 
-    cur = room_data.get("current_turn")
+    current = room_data.get("current_turn")
 
-    # cur が turn_order にない場合は最初の生存プレイヤーにする
-    if cur not in order or not room_data["alive"].get(cur, False):
-        for p in order:
-            if room_data["alive"].get(p, False):
-                room_data["current_turn"] = p
-                cur = p
-                break
+    # --- current_turn が生存者でなければ、先頭の生存者に ---
+    if current not in alive_players:
+        room_data["current_turn"] = alive_players[0]
     else:
-        # 次の生存プレイヤーを探す
-        idx = order.index(cur)
-        next_player = None
-        for i in range(1, len(order)+1):
-            p = order[(idx + i) % len(order)]
-            if room_data["alive"].get(p, False):
-                next_player = p
-                break
-        if next_player:
-            room_data["current_turn"] = next_player
+        idx = alive_players.index(current)
+        room_data["current_turn"] = alive_players[(idx + 1) % len(alive_players)]
 
-    # hand_counts 更新
     hand_counts = { p: len(room_data["hands"][p]) for p in room_data["players"] }
 
-    # UI更新
+    # --- UI更新 ---
     emit("announce_turn", {
         "player": room_data["current_turn"],
-        "players": room_data["players"],
+        "players": room_data["players"],  # players は固定
         "passes": room_data["passes"],
         "hand_counts": hand_counts
     }, to=room)
 
     broadcast_update_hands(room)
 
-    # 次がCPUなら続行
-    process_turn(room)
-
+    # --- 次が CPU なら自動進行 ---
+    current_player = room_data["current_turn"]
+    if current_player.startswith("COM"):
+        socketio.sleep(0.5)  # 少し待機してから CPU 処理
+        process_turn(room)
 
 @socketio.on("leave_lobby")
 def handle_leave(data):

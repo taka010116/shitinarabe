@@ -514,7 +514,7 @@ def handle_pass(data):
     }, to=room)
     broadcast_update_hands(room)
     # COMなら自動進行
-    process_turn(room)
+    #process_turn(room)
     #check_elimination(room)
 
 #敗北処理

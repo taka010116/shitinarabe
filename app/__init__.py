@@ -422,17 +422,13 @@ def handle_pass(data):
     room = data["room"]
     room_data = game_rooms[room]
 
-    # パス回数増加（3回超えたらパス不可 ※ 実際は UI 側で押せないようにする）
     room_data["passes"][username] += 1
     print(f"{username} はパスしました（現在: {room_data['passes'][username]}回）")
 
     #パス4回死亡
     if room_data["passes"][username] >= 4:
         eliminate_player(room, username)
-        hand_counts = { p: len(room_data["hands"][p]) for p in room_data["players"] }
     
-    
-    print("パス処理、turn_order : ", room_data["turn_order"])
 
     hand_counts = { p: len(room_data["hands"][p]) for p in room_data["players"] }
     advance_turn(room)
@@ -444,7 +440,6 @@ def handle_pass(data):
     }, to=room)
     broadcast_update_hands(room)
     process_turn(room)
-    #check_elimination(room)
 
 #敗北処理
 @socketio.on("lose")
@@ -465,9 +460,7 @@ def eliminate_player(room, player):
 
     hand.clear()
 
-    # プレイヤーを脱落状態に変更
     room_data["alive"][player] = False
-    #room_data["alive"].pop(player, False)
     room_data["ranking"].append(player)
 
     print("除外, Ranking :", room_data["ranking"])
@@ -495,6 +488,9 @@ def eliminate_player(room, player):
         "player": player,
         "rank": len(room_data["ranking"])
     }, to=room)
+
+    advance_turn(room)
+    
 
 #敗北チェック
 def check_elimination(room):

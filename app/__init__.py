@@ -499,6 +499,13 @@ def eliminate_player(room, player):
 
     advance_turn(room)
 
+#プレーヤー降参
+@socketio.on("player_surrender")
+def handle_surrender(data):
+    username = data["username"]
+    room = data["room"]
+    eliminate_player(room, username)
+
 
 #敗北チェック
 def check_elimination(room):
@@ -553,56 +560,6 @@ def check_clear(room, username):
 
         # ✅ 次のプレイヤーにターン回す
         advance_turn(room)
-
-"""
-#ターンを回す
-def advance_turn(room):
-    room_data = game_rooms[room]
-    order = room_data["turn_order"]
-    #order = list(room_data["alive"].keys()) if isinstance(room_data["alive"], dict) else room_data["alive"]
-    cur = room_data["current_turn"]
-    idx = order.index(cur)
-    print("oder", order)
-
-    if cur not in order:
-        if order:
-            room_data["current_turn"] = order[0]
-        else:
-            print(f"[DEBUG] 全員死亡 or ゲーム終了 room={room}")
-            return
-    
-    print("cur", cur)
-    # 次の生存プレイヤーを探す
-    for i in range(1, len(order)+1):
-        nxt = order[(idx + i) % len(order)]
-        if room_data["alive"].get(nxt, True):
-            room_data["current_turn"] = nxt
-            break
-    
-    hand_counts = { p: len(room_data["hands"][p]) for p in room_data["players"] }
-
-    # UI 更新
-    emit("announce_turn", {
-        "player": room_data["current_turn"],
-        "players": room_data["players"],
-        "passes": room_data["passes"],
-        "hand_counts": hand_counts
-    }, to=room)
-
-    # 画面手札更新
-    for p in room_data["players"]:
-        emit("update_hand", {
-            "username": p,
-            "hand": room_data["hands"][p],
-            "playable": get_playable_cards(room_data["hands"][p], room_data["table"]),
-            "current_turn": room_data["current_turn"],
-            "passes": room_data["passes"]
-        }, to=room)
-
-    # 次が CPU なら続行
-    process_turn(room)
-"""
-
     
 def advance_turn(room):
     room_data = game_rooms[room]
@@ -650,7 +607,6 @@ def handle_leave(data):
         print(f"{username} left the lobby. 現在の人数: {len(waiting_players)}")
         broadcast_lobby_count()
 
-
 @socketio.on("start_match")
 def handle_start():
     """4人揃ったら自動でゲーム開始"""
@@ -666,21 +622,6 @@ def handle_start():
 
         # 人数更新（残りのロビー人数を送信）
         broadcast_lobby_count()
-
-"""
-@socketio.on("play_card")
-def handle_play(data):
-    room = data["room"]
-    username = data["username"]
-    card = data["card"]
-    # ここで場のルールチェック（7からの連番）
-    # 場に出せる場合だけ
-    game_rooms[room]["hands"][username].remove(card)
-    suit = card[0]
-    game_rooms[room]["table"][suit].append(card)
-    emit("card_played", {"username": username, "card": card, "table": rooms[room]["table"]}, room=room)
-"""
-
 
 # ----------------------------
 # Render/Gunicorn 実行

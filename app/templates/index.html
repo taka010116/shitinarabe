@@ -112,25 +112,5 @@ body {
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-  // 背景にランダムなカード画像を配置
-  const cards = [
-    "/static/cards/D1.png",
-    "/static/cards/H5.png",
-    "/static/cards/S12.png",
-    "/static/cards/C7.png",
-    "/static/cards/JOKER.png"
-  ];
-  for (let i = 0; i < 12; i++) {
-    const card = document.createElement("img");
-    card.src = cards[Math.floor(Math.random() * cards.length)];
-    card.className = "card";
-    card.style.top = Math.random() * window.innerHeight + "px";
-    card.style.left = Math.random() * window.innerWidth + "px";
-    card.style.transform = `rotate(${Math.random() * 30 - 15}deg)`;
-    card.style.animationDuration = (6 + Math.random() * 6) + "s";
-    document.body.appendChild(card);
-  }
-});
 </script>
 {% endblock %}

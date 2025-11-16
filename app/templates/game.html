@@ -270,26 +270,35 @@ socket.on("announce_turn", data => {
         `;
     });
 
-    playersUI.innerHTML = html;
+    playersUI.innerHTML = html; 
+    console.log("パス回数 : " + passes[username]);
+
 
     const passBtn = document.getElementById("pass-btn");
-    if (player === username && passes[username] < 3) {
-        passBtn.style.display = "inline-block";
-        passBtn.innerText = `パス（残り ${3 - passes[username]}）`;
-        
+    if (player === username) {
+    // 自分のターンの場合のみボタン表示
+    passBtn.style.display = "inline-block";
+
+    if ((passes[username] ?? 0) < 3) {
+        // パス可能
+        passBtn.innerText = `パス（残り ${3 - (passes[username] ?? 0)}）`;
         passBtn.onclick = () => {
             console.log("パス送信");
             socket.emit("pass_turn", { username, room });
         };
     } else {
-        passBtn.style.display = "inline-block";
+        // パス3回で降参
         passBtn.innerText = "降参";
-
-          passBtn.onclick = () => {
-              console.log("降参送信");
-              socket.emit("player_surrender", { username, room });
-          };
+        passBtn.onclick = () => {
+            console.log("降参送信");
+            socket.emit("player_surrender", { username, room });
+        };
     }
+} else {
+    // 自分のターンじゃない場合はボタン非表示
+    passBtn.style.display = "none";
+    passBtn.onclick = null;
+}
 });
 
 

@@ -467,7 +467,7 @@ def eliminate_player(room, player):
     hand.clear()
 
     room_data["alive"][player] = False
-    room_data["ranking"].append(player)
+    room_data["ranking"].insert(0, player)
 
     print("除外, Ranking :", room_data["ranking"])
 

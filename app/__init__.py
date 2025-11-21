@@ -550,12 +550,16 @@ def check_clear(room, username):
     if hand_empty and pass_ok:
         # ✅ 勝利確定
         room_data["alive"][username] = False
-        room_data["rankings"].append(username)
+        room_data["ranking"].append(username)
         print(f"✅ {username} がクリア！（順位: {len(room_data['rankings'])} 位）")
 
         emit("player_cleared", {
             "username": username,
-            "rank": len(room_data["rankings"]),
+            "rank": len(room_data["ranking"]),
+        }, to=room)
+        
+        emit("update_ranking", {
+            "ranks": room_data["ranking"]
         }, to=room)
 
         # ✅ 次のプレイヤーにターン回す

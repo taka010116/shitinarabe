@@ -100,6 +100,16 @@
         border-radius: 10px;
      ">
 </div>
+<div id="ranking-ui" style="
+    position: absolute;
+    right: 20px;
+    top: 100px;
+    width: 180px;
+    padding: 10px;
+    border: 1px solid #333;
+    background: #fafafa;
+"></div>
+
 <script>
 const socket = io();
 
@@ -301,6 +311,29 @@ socket.on("announce_turn", data => {
 }
 });
 
+//ランキング更新
+socket.on("update_ranking", data => {
+    const { ranks } = data;
+
+    updateRankingUI(ranks);
+});
+
+function updateRankingUI(ranks) {
+    const rankUI = document.getElementById("ranking-ui");
+
+    if (!ranks || ranks.length === 0) {
+        rankUI.innerHTML = "<b>確定順位：</b><br>なし";
+        return;
+    }
+
+    let html = "<b>確定順位：</b><br><br>";
+
+    ranks.forEach((p, i) => {
+        html += `${i + 1} 位： ${p}<br>`;
+    });
+
+    rankUI.innerHTML = html;
+}
 
 
 socket.on("card_played", data => {

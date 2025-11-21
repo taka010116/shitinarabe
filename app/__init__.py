@@ -486,6 +486,11 @@ def eliminate_player(room, player):
     emit("update_table", {"table": table}, to=room)
     broadcast_update_hands(room)
 
+    emit("update_ranking", {
+            "ranks": room_data["ranking"]
+        }, to=room)
+
+
     # ターン順から除外
     order = room_data["turn_order"]
     if player in order:
@@ -557,7 +562,7 @@ def check_clear(room, username):
             "username": username,
             "rank": len(room_data["ranking"]),
         }, to=room)
-        
+
         emit("update_ranking", {
             "ranks": room_data["ranking"]
         }, to=room)

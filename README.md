@@ -1,8 +1,6 @@
 Renderでホームページを公開しています。
 
-https://html-mq6q.onrender.com/
+](https://shitinarabe.onrender.com/)
 
-遊べるオンラインゲーム
-
-DOUBLE MINE --相手の選択を読む心理ゲーム
+七並べオンラインゲーム！
 
